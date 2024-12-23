@@ -29,7 +29,7 @@
           :isVisible="isDeleteModalVisible"
           title="Подтвердите действие"
           action-button-text="Удалить"
-          customActionText="Вы уверены, что хотите удалить эту запись?"
+          custom-action-text="Вы уверены, что хотите удалить эту запись?"
           :fields="deleteModalFields"
           @submit="handleDeleteConfirm"
           @update:isVisible="isDeleteModalVisible = $event"
@@ -50,6 +50,7 @@ import {
   editStorageLocation,
   getStorageLocation
 } from "@/api/storageLocation";
+import dayjs from "dayjs";
 
 export default defineComponent({
   components: {
@@ -68,7 +69,7 @@ export default defineComponent({
     const isModalVisible = ref(false); // Для отображения модального окна
     const isDeleteModalVisible = ref(false); // Для отображения модального окна удаления
     const isEditMode = ref(false); // Режим редактирования
-    const formData = reactive({}); // Данные для формы
+    const formData = ref({}); // Данные для формы
     const modalFields = [
       { name: "rack", label: "Стеллаж", placeholder: "Введите значение" },
       { name: "compartment", label: "Отсек", placeholder: "Введите значение" },
@@ -81,7 +82,10 @@ export default defineComponent({
     const fetchLocations = async () => {
       try {
         const response = await getStorageLocations();
-        storageLocations.value = response.data;
+        storageLocations.value = response.data.map((storageLocation) => ({
+          ...storageLocation,
+          createdAt: dayjs(storageLocation.createdAt).format("YYYY.MM.DD HH:mm:ss"),
+        }));
       } catch (error) {
         console.error("Ошибка при загрузке данных:", error);
       }
@@ -90,9 +94,7 @@ export default defineComponent({
     // Открыть модальное окно для создания нового места хранения
     const openCreateModal = () => {
       isEditMode.value = false; // Устанавливаем режим создания
-      formData.rack = ''; // Очищаем данные формы
-      formData.compartment = '';
-      formData.part = '';
+      formData.value = {};
       isModalVisible.value = true; // Открываем модальное окно
     };
 
@@ -101,9 +103,7 @@ export default defineComponent({
       isEditMode.value = true; // Режим редактирования
       try {
         const response = await getStorageLocation(row.id); // Получаем данные по ID
-        formData.rack = response.data.rack;
-        formData.compartment = response.data.compartment;
-        formData.part = response.data.part;
+        formData.value = response.data;
         isModalVisible.value = true; // Открываем модальное окно
       } catch (error) {
         console.error("Ошибка при редактировании записи:", error);
@@ -111,15 +111,15 @@ export default defineComponent({
     };
 
     // Обработчик для отправки данных из формы
-    const handleModalSubmit = async (formData) => {
+    const handleModalSubmit = async (data) => {
       try {
         if (isEditMode.value) {
           // Если это редактирование, то выполняем запрос на редактирование
-          const response = await editStorageLocation(formData.id, formData);
+          const response = await editStorageLocation(formData.value.id, data);
           console.log("Мест хранения отредактировано:", response);
         } else {
           // Если это создание, то выполняем запрос на создание
-          const response = await createStorageLocation(formData);
+          const response = await createStorageLocation(data);
           console.log("Мест хранения создано:", response);
         }
         fetchLocations(); // Обновляем список мест хранения

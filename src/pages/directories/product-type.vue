@@ -29,7 +29,7 @@
           :isVisible="isDeleteModalVisible"
           title="Подтвердите действие"
           action-button-text="Удалить"
-          customActionText="Вы уверены, что хотите удалить эту запись?"
+          custom-action-text="Вы уверены, что хотите удалить эту запись?"
           :fields="deleteModalFields"
           @submit="handleDeleteConfirm"
           @update:isVisible="isDeleteModalVisible = $event"
@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onCreated } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import Header from "@/components/common/Header.vue";
 import Table from "@/components/common/Table.vue";
 import Modal from "@/components/common/Modal.vue";
@@ -50,6 +50,7 @@ import {
   editProductType,
   getProductType
 } from "@/api/productType.js";
+import dayjs from "dayjs";
 
 export default defineComponent({
   components: {
@@ -80,7 +81,10 @@ export default defineComponent({
     const fetchProductType = async () => {
       try {
         const response = await getProductTypes();
-        productTypes.value = response.data;
+        productTypes.value = response.data.map((productType) => ({
+          ...productType,
+          createdAt: dayjs(productType.createdAt).format("YYYY.MM.DD HH:mm:ss"),
+        }));
       } catch (error) {
         console.error("Ошибка при загрузке данных:", error);
       }
@@ -106,13 +110,13 @@ export default defineComponent({
     };
 
     // Submit form data for creating or editing
-    const handleModalSubmit = async (formData) => {
+    const handleModalSubmit = async (data) => {
       try {
         if (isEditMode.value) {
-          const response = await editProductType(formData.id, formData);
+          const response = await editProductType(formData.value.id, data);
           console.log("Категория товара отредактирована:", response);
         } else {
-          const response = await createProductType(formData);
+          const response = await createProductType(data);
           console.log("Категория товара создана:", response);
         }
         fetchProductType();
@@ -147,7 +151,7 @@ export default defineComponent({
     };
 
     // Load data on creation
-    onCreated(() => {
+    onMounted(() => {
       fetchProductType();
     });
 
