@@ -1,98 +1,148 @@
 <template>
-  <div v-if="isVisible" class="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
-    <div class="bg-white p-6 rounded-lg w-1/3">
-      <h2 class="text-xl font-semibold mb-4">{{ title }}</h2>
+  <div v-if="isVisible" class="modal-overlay">
+    <div class="modal-container">
+      <h3 class="modal-title">{{ title }}</h3>
       <form @submit.prevent="handleSubmit">
-        <div v-for="(field, index) in fields" :key="index" class="mb-4">
-          <label :for="field.name" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+        <div v-for="field in fields" :key="field.name" class="modal-field">
+          <label :for="field.name" class="modal-label">{{ field.label }}</label>
+
+          <!-- Для текстовых полей -->
           <input
-              v-model="formData[field.name]"
-              :type="field.type || 'text'"
+              v-if="!field.type || field.type === 'text'"
               :id="field.name"
-              :name="field.name"
-              required
-              class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
               :placeholder="field.placeholder"
+              v-model="formData[field.name]"
+              class="modal-input"
           />
+
+          <!-- Для числовых полей -->
+          <input
+              v-else-if="field.type === 'number'"
+              :id="field.name"
+              type="number"
+              :placeholder="field.placeholder"
+              v-model="formData[field.name]"
+              class="modal-input"
+          />
+
+          <!-- Для полей select -->
+          <select
+              v-else-if="field.type === 'select'"
+              :id="field.name"
+              v-model="formData[field.name]"
+              class="modal-select"
+          >
+            <option v-for="option in field.options" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
         </div>
+
         <div v-if="customActionText">
           <p>{{ customActionText }}</p>
         </div>
+
         <div class="flex justify-end mt-4">
           <button
-              @click="close"
+              type="button"
               class="bg-gray-300 text-black px-4 py-2 rounded mr-2"
+              @click="handleCancel"
           >
             Отмена
           </button>
-          <button
-              @click="handleSubmit"
-              class="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            {{ actionButtonText }}
-          </button>
+          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">{{ actionButtonText }}</button>
         </div>
       </form>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, watch } from 'vue';
+<script>
+import { defineComponent } from "vue";
 
-// Определяем пропсы с помощью defineProps
-const props = defineProps({
-  isVisible: {
-    type: Boolean,
-    required: true,
+export default defineComponent({
+  props: {
+    isVisible: Boolean,
+    title: String,
+    fields: Array,
+    formData: Object,
+    actionButtonText: String,
+    customActionText: {
+      type: String,
+      default: '', // по умолчанию пустая строка
+    },
   },
-  title: {
-    type: String,
-    default: "Создание",
-  },
-  fields: {
-    type: Array,
-    required: true,
-  },
-  actionButtonText: {
-    type: String,
-    default: 'Создать', // или 'Сохранить', если редактирование
-  },
-  customActionText: {
-    type: String,
-    default: '', // по умолчанию пустая строка
+  emits: ["submit", "update:isVisible"],
+  methods: {
+    handleSubmit() {
+      this.$emit("submit", this.formData);
+      this.$emit("update:isVisible", false);
+    },
+    handleCancel() {
+      this.$emit("update:isVisible", false); // Закрыть модальное окно
+    },
   },
 });
-
-// Используем ref для хранения данных формы
-const formData = ref({});
-
-// Получаем событие с помощью defineEmits
-const emit = defineEmits();
-
-// Слежение за изменениями isVisible и сброс формы
-watch(() => props.isVisible, (newVal) => {
-  if (newVal) {
-    resetForm();
-  }
-});
-
-// Метод для закрытия модального окна
-function close() {
-  emit('update:isVisible', false);
-}
-
-// Метод для отправки данных формы
-function handleSubmit() {
-  emit('submit', formData.value); // Отправляем данные формы
-  close(); // Закрываем окно после отправки
-}
-
-// Сброс данных формы при открытии окна
-function resetForm() {
-  formData.value = props.fields.reduce((acc, field) => {
-    acc[field.name] = field.defaultValue || ''; // Если в поле есть значение по умолчанию
-    return acc;
-  }, {});
-}
 </script>
+
+<style scoped>
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal-container {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+}
+.modal-title {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+.modal-field {
+  margin-bottom: 15px;
+}
+.modal-label {
+  display: block;
+  margin-bottom: 5px;
+}
+.modal-input,
+.modal-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+.modal-action-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.modal-cancel-button {
+  background-color: #f5f5f5;
+  color: #333;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.modal-cancel-button:hover {
+  background-color: #e0e0e0;
+}
+</style>

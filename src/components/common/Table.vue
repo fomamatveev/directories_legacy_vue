@@ -1,8 +1,8 @@
 <template>
   <div class="bg-white shadow-lg rounded-lg p-6">
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex justify-self-auto items-center mb-4">
       <button
-          class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none"
+          class="bg-blue-600 text-white py-2 px-4 mr-2 rounded-md hover:bg-blue-700 focus:outline-none"
           @click="create"
       >
         Создать
