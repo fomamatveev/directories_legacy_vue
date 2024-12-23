@@ -16,7 +16,7 @@
       <!-- Модальное окно для создания или редактирования -->
       <Modal
           :isVisible="isModalVisible"
-          :title="isEditMode ? 'Редактирование места хранения' : 'Создание места хранения'"
+          :title="isEditMode ? 'Редактирование товара' : 'Создание товара'"
           :fields="modalFields"
           :action-button-text="isEditMode ? 'Сохранить' : 'Создать'"
           :formData="formData"
@@ -24,7 +24,7 @@
           @update:isVisible="isModalVisible = $event"
       />
 
-      <!-- Модальное окно для создания или редактирования -->
+      <!-- Модальное окно для подтверждения удаления -->
       <Modal
           :isVisible="isDeleteModalVisible"
           title="Подтвердите действие"
@@ -39,6 +39,7 @@
 </template>
 
 <script>
+import { defineComponent, ref, reactive, onMounted } from 'vue';
 import Header from "@/components/common/Header.vue";
 import Table from "@/components/common/Table.vue";
 import Modal from "@/components/common/Modal.vue";
@@ -52,129 +53,165 @@ import {
 import {getProductTypes} from "~/api/productType.js";
 import {getStorageLocations} from "~/api/storageLocation.js";
 
-export default {
+export default defineComponent({
   components: {
     Header,
     Table,
     Modal,
   },
-  data() {
-    return {
-      columns: [
-        { key: 'name', label: 'Наименование' },
-        { key: 'shortName', label: 'Краткое наименование' },
-        { key: 'quantity', label: 'Кол-во' },
-        { key: 'productTypeId', label: 'Категория' },
-        { key: 'storageLocationId', label: 'Место хранения' },
-        { key: 'createdAt', label: 'Создано в' },
-      ],
-      products: [], // Список мест хранения
-      productTypes: [],
-      storageLocations: [],
-      isModalVisible: false, // Для отображения модального окна
-      isDeleteModalVisible: false, // Для отображения модального окна удаления
-      isEditMode: false, // Режим редактирования
-      formData: {}, // Данные для формы
-      modalFields: [
-        { name: "name", label: "Наименование", placeholder: "Введите значение" },
-        { name: "shortName", label: "Краткое наименование", placeholder: "Введите значение" },
-        { name: "quantity", label: "Количество", placeholder: "Введите значение" },
-        { name: "productTypeId", label: "Категория", placeholder: "Выберите категорию" },
-        { name: "storageLocationId", label: "Место хранения", placeholder: "Выберите место хранения" },
-      ], // Поля для модального окна
-      deleteModalFields: [], // Модальные поля для подтверждения удаления
-      itemToDelete: null, // Для хранения ID удаляемой записи
-    };
-  },
-  created() {
-    this.fetchProducts();
-    this.fetchProductTypes();
-    this.fetchStorageLocations();
-  },
-  methods: {
-    // Загружаем список мест хранения
-    async fetchProducts() {
+  setup() {
+    const columns = [
+      {key: 'name', label: 'Наименование'},
+      {key: 'shortName', label: 'Краткое наименование'},
+      {key: 'quantity', label: 'Кол-во'},
+      {key: 'productTypeId', label: 'Категория'},
+      {key: 'storageLocationId', label: 'Место хранения'},
+      {key: 'createdAt', label: 'Создано в'},
+    ];
+
+    const products = ref([]); // Список товаров
+    const productTypes = ref([]); // Список категорий
+    const storageLocations = ref([]); // Список мест хранения
+    const isModalVisible = ref(false); // Для отображения модального окна
+    const isDeleteModalVisible = ref(false); // Для отображения модального окна удаления
+    const isEditMode = ref(false); // Режим редактирования
+    const formData = reactive({}); // Данные для формы
+    const modalFields = [
+      {name: "name", label: "Наименование", placeholder: "Введите значение"},
+      {name: "shortName", label: "Краткое наименование", placeholder: "Введите значение"},
+      {name: "quantity", label: "Количество", placeholder: "Введите значение"},
+      {name: "productTypeId", label: "Категория", placeholder: "Выберите категорию"},
+      {name: "storageLocationId", label: "Место хранения", placeholder: "Выберите место хранения"},
+    ]; // Поля для модального окна
+    const deleteModalFields = []; // Модальные поля для подтверждения удаления
+    const itemToDelete = ref(null); // Для хранения ID удаляемой записи
+
+    // Загружаем список товаров
+    const fetchProducts = async () => {
       try {
         const response = await getProducts();
-        this.products = response.data;
+        products.value = response.data;
       } catch (error) {
         console.error("Ошибка при загрузке данных:", error);
       }
-    },
+    };
+
     // Загружаем список категорий
-    async fetchProductTypes() {
+    const fetchProductTypes = async () => {
       try {
-        const response = await getProductTypes();  // Замените на реальный API для получения категорий
-        this.productTypes = response.data;
+        const response = await getProductTypes();
+        productTypes.value = response.data;
       } catch (error) {
         console.error("Ошибка при загрузке категорий:", error);
       }
-    },
+    };
+
     // Загружаем список мест хранения
-    async fetchStorageLocations() {
+    const fetchStorageLocations = async () => {
       try {
-        const response = await getStorageLocations();  // Замените на реальный API для получения мест хранения
-        this.storageLocations = response.data;
+        const response = await getStorageLocations();
+        storageLocations.value = response.data;
       } catch (error) {
         console.error("Ошибка при загрузке мест хранения:", error);
       }
-    },
-    // Открыть модальное окно для создания нового места хранения
-    openCreateModal() {
-      this.isEditMode = false; // Устанавливаем режим создания
-      this.formData = {}; // Очищаем данные формы
-      this.isModalVisible = true; // Открываем модальное окно
-    },
+    };
+
+    // Открыть модальное окно для создания нового товара
+    const openCreateModal = () => {
+      isEditMode.value = false; // Устанавливаем режим создания
+      formData.name = ''; // Очищаем данные формы
+      formData.shortName = '';
+      formData.quantity = '';
+      formData.productTypeId = '';
+      formData.storageLocationId = '';
+      isModalVisible.value = true; // Открываем модальное окно
+    };
+
     // Открыть модальное окно для редактирования
-    async handleEdit(row) {
-      this.isEditMode = true; // Режим редактирования
+    const handleEdit = async (row) => {
+      isEditMode.value = true; // Режим редактирования
       try {
         const response = await getProduct(row.id); // Получаем данные по ID
-        this.formData = response.data; // Заполняем форму данными
-        this.isModalVisible = true; // Открываем модальное окно
+        formData.name = response.data.name;
+        formData.shortName = response.data.shortName;
+        formData.quantity = response.data.quantity;
+        formData.productTypeId = response.data.productTypeId;
+        formData.storageLocationId = response.data.storageLocationId;
+        isModalVisible.value = true; // Открываем модальное окно
       } catch (error) {
         console.error("Ошибка при редактировании записи:", error);
       }
-    },
+    };
+
     // Обработчик для отправки данных из формы
-    async handleModalSubmit(formData) {
+    const handleModalSubmit = async (formData) => {
       try {
-        if (this.isEditMode) {
+        if (isEditMode.value) {
           // Если это редактирование, то выполняем запрос на редактирование
-          const response = await editProduct(this.formData.id, formData);
-          console.log("Мест хранения отредактировано:", response);
+          const response = await editProduct(formData.id, formData);
+          console.log("Продукт отредактирован:", response);
         } else {
           // Если это создание, то выполняем запрос на создание
           const response = await createProduct(formData);
-          console.log("Мест хранения создано:", response);
+          console.log("Продукт создан:", response);
         }
-        this.fetchProducts(); // Обновляем список мест хранения
+        fetchProducts(); // Обновляем список товаров
       } catch (error) {
         console.error("Ошибка при отправке данных:", error);
       }
-    },
+    };
+
     // Обработчик для удаления записи
-    handleDelete(row) {
-      this.itemToDelete = row.id; // Сохраняем ID удаляемой записи
-      this.isDeleteModalVisible = true; // Открываем модальное окно подтверждения
-    },
+    const handleDelete = (row) => {
+      itemToDelete.value = row.id; // Сохраняем ID удаляемой записи
+      isDeleteModalVisible.value = true; // Открываем модальное окно подтверждения
+    };
+
     // Подтверждение удаления
-    async handleDeleteConfirm() {
-      if (this.itemToDelete !== null) {
+    const handleDeleteConfirm = async () => {
+      if (itemToDelete.value !== null) {
         try {
-          await deleteProduct(this.itemToDelete); // Удаляем запись
-          console.log("Место хранения удалено");
-          this.fetchProducts(); // Обновляем список
-          this.isDeleteModalVisible = false; // Закрываем модальное окно
+          await deleteProduct(itemToDelete.value); // Удаляем запись
+          console.log("Продукт удален");
+          fetchProducts(); // Обновляем список
+          isDeleteModalVisible.value = false; // Закрываем модальное окно
         } catch (error) {
           console.error("Ошибка при удалении записи:", error);
         }
       }
-    },
-    handleRefresh() {
-      // Метод для обновления данных
-      this.fetchProducts(); // Например, вызываем метод для повторного получения данных
-    },
+    };
+
+    // Метод для обновления данных
+    const handleRefresh = () => {
+      fetchProducts(); // Например, вызываем метод для повторного получения данных
+    };
+
+    // Загружаем данные при монтировании компонента
+    onMounted(() => {
+      fetchProducts();
+      fetchProductTypes();
+      fetchStorageLocations();
+    });
+
+    return {
+      columns,
+      products,
+      productTypes,
+      storageLocations,
+      isModalVisible,
+      isDeleteModalVisible,
+      isEditMode,
+      formData,
+      modalFields,
+      deleteModalFields,
+      itemToDelete,
+      openCreateModal,
+      handleEdit,
+      handleModalSubmit,
+      handleDelete,
+      handleDeleteConfirm,
+      handleRefresh,
+    };
   },
-};
+});
 </script>

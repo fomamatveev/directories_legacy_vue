@@ -45,11 +45,12 @@
 </template>
 
 <script>
+import { defineComponent } from 'vue';
 import Header from "@/components/common/Header.vue";
 
-export default {
+export default defineComponent({
   components: {
     Header,
   },
-};
+});
 </script>

@@ -24,7 +24,7 @@
           @update:isVisible="isModalVisible = $event"
       />
 
-      <!-- Модальное окно для создания или редактирования -->
+      <!-- Модальное окно для подтверждения удаления -->
       <Modal
           :isVisible="isDeleteModalVisible"
           title="Подтвердите действие"
@@ -39,6 +39,7 @@
 </template>
 
 <script>
+import { defineComponent, ref, reactive, onMounted } from 'vue';
 import Header from "@/components/common/Header.vue";
 import Table from "@/components/common/Table.vue";
 import Modal from "@/components/common/Modal.vue";
@@ -50,102 +51,130 @@ import {
   getStorageLocation
 } from "@/api/storageLocation";
 
-export default {
+export default defineComponent({
   components: {
     Header,
     Table,
     Modal,
   },
-  data() {
-    return {
-      columns: [
-        { key: 'rack', label: 'Стеллаж' },
-        { key: 'compartment', label: 'Отсек' },
-        { key: 'part', label: 'Часть' },
-      ],
-      storageLocations: [], // Список мест хранения
-      isModalVisible: false, // Для отображения модального окна
-      isDeleteModalVisible: false, // Для отображения модального окна удаления
-      isEditMode: false, // Режим редактирования
-      formData: {}, // Данные для формы
-      modalFields: [
-        { name: "rack", label: "Стеллаж", placeholder: "Введите значение" },
-        { name: "compartment", label: "Отсек", placeholder: "Введите значение" },
-        { name: "part", label: "Часть", placeholder: "Введите значение" },
-      ], // Поля для модального окна
-      deleteModalFields: [], // Модальные поля для подтверждения удаления
-      itemToDelete: null, // Для хранения ID удаляемой записи
-    };
-  },
-  created() {
-    this.fetchLocations();
-  },
-  methods: {
+  setup() {
+    const columns = [
+      { key: 'rack', label: 'Стеллаж' },
+      { key: 'compartment', label: 'Отсек' },
+      { key: 'part', label: 'Часть' },
+    ];
+
+    const storageLocations = ref([]); // Список мест хранения
+    const isModalVisible = ref(false); // Для отображения модального окна
+    const isDeleteModalVisible = ref(false); // Для отображения модального окна удаления
+    const isEditMode = ref(false); // Режим редактирования
+    const formData = reactive({}); // Данные для формы
+    const modalFields = [
+      { name: "rack", label: "Стеллаж", placeholder: "Введите значение" },
+      { name: "compartment", label: "Отсек", placeholder: "Введите значение" },
+      { name: "part", label: "Часть", placeholder: "Введите значение" },
+    ]; // Поля для модального окна
+    const deleteModalFields = []; // Модальные поля для подтверждения удаления
+    const itemToDelete = ref(null); // Для хранения ID удаляемой записи
+
     // Загружаем список мест хранения
-    async fetchLocations() {
+    const fetchLocations = async () => {
       try {
         const response = await getStorageLocations();
-        this.storageLocations = response.data;
+        storageLocations.value = response.data;
       } catch (error) {
         console.error("Ошибка при загрузке данных:", error);
       }
-    },
+    };
+
     // Открыть модальное окно для создания нового места хранения
-    openCreateModal() {
-      this.isEditMode = false; // Устанавливаем режим создания
-      this.formData = {}; // Очищаем данные формы
-      this.isModalVisible = true; // Открываем модальное окно
-    },
+    const openCreateModal = () => {
+      isEditMode.value = false; // Устанавливаем режим создания
+      formData.rack = ''; // Очищаем данные формы
+      formData.compartment = '';
+      formData.part = '';
+      isModalVisible.value = true; // Открываем модальное окно
+    };
+
     // Открыть модальное окно для редактирования
-    async handleEdit(row) {
-      this.isEditMode = true; // Режим редактирования
+    const handleEdit = async (row) => {
+      isEditMode.value = true; // Режим редактирования
       try {
         const response = await getStorageLocation(row.id); // Получаем данные по ID
-        this.formData = response.data; // Заполняем форму данными
-        this.isModalVisible = true; // Открываем модальное окно
+        formData.rack = response.data.rack;
+        formData.compartment = response.data.compartment;
+        formData.part = response.data.part;
+        isModalVisible.value = true; // Открываем модальное окно
       } catch (error) {
         console.error("Ошибка при редактировании записи:", error);
       }
-    },
+    };
+
     // Обработчик для отправки данных из формы
-    async handleModalSubmit(formData) {
+    const handleModalSubmit = async (formData) => {
       try {
-        if (this.isEditMode) {
+        if (isEditMode.value) {
           // Если это редактирование, то выполняем запрос на редактирование
-          const response = await editStorageLocation(this.formData.id, formData);
+          const response = await editStorageLocation(formData.id, formData);
           console.log("Мест хранения отредактировано:", response);
         } else {
           // Если это создание, то выполняем запрос на создание
           const response = await createStorageLocation(formData);
           console.log("Мест хранения создано:", response);
         }
-        this.fetchLocations(); // Обновляем список мест хранения
+        fetchLocations(); // Обновляем список мест хранения
       } catch (error) {
         console.error("Ошибка при отправке данных:", error);
       }
-    },
+    };
+
     // Обработчик для удаления записи
-    handleDelete(row) {
-      this.itemToDelete = row.id; // Сохраняем ID удаляемой записи
-      this.isDeleteModalVisible = true; // Открываем модальное окно подтверждения
-    },
+    const handleDelete = (row) => {
+      itemToDelete.value = row.id; // Сохраняем ID удаляемой записи
+      isDeleteModalVisible.value = true; // Открываем модальное окно подтверждения
+    };
+
     // Подтверждение удаления
-    async handleDeleteConfirm() {
-      if (this.itemToDelete !== null) {
+    const handleDeleteConfirm = async () => {
+      if (itemToDelete.value !== null) {
         try {
-          await deleteStorageLocation(this.itemToDelete); // Удаляем запись
+          await deleteStorageLocation(itemToDelete.value); // Удаляем запись
           console.log("Место хранения удалено");
-          this.fetchLocations(); // Обновляем список
-          this.isDeleteModalVisible = false; // Закрываем модальное окно
+          fetchLocations(); // Обновляем список
+          isDeleteModalVisible.value = false; // Закрываем модальное окно
         } catch (error) {
           console.error("Ошибка при удалении записи:", error);
         }
       }
-    },
-    handleRefresh() {
+    };
+
+    const handleRefresh = () => {
       // Метод для обновления данных
-      this.fetchLocations(); // Например, вызываем метод для повторного получения данных
-    },
+      fetchLocations(); // Например, вызываем метод для повторного получения данных
+    };
+
+    // Загружаем данные при монтировании компонента
+    onMounted(() => {
+      fetchLocations();
+    });
+
+    return {
+      columns,
+      storageLocations,
+      isModalVisible,
+      isDeleteModalVisible,
+      isEditMode,
+      formData,
+      modalFields,
+      deleteModalFields,
+      itemToDelete,
+      openCreateModal,
+      handleEdit,
+      handleModalSubmit,
+      handleDelete,
+      handleDeleteConfirm,
+      handleRefresh,
+    };
   },
-};
+});
 </script>

@@ -26,15 +26,24 @@
 </template>
 
 <script>
-export default {
-  methods: {
-    logout() {
+import { defineComponent } from 'vue';
+import { useRouter } from 'vue-router';
+
+export default defineComponent({
+  setup() {
+    const router = useRouter();
+
+    const logout = () => {
       // Очистка локальных данных авторизации (например, удаление токена)
       localStorage.removeItem("authToken");
-      this.$router.push("/login"); // Перенаправление на страницу логина
-    },
+      router.push("/login"); // Перенаправление на страницу логина
+    };
+
+    return {
+      logout,
+    };
   },
-};
+});
 </script>
 
 <style scoped>
