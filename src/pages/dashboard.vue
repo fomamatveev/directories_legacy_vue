@@ -7,7 +7,7 @@
         <!-- Карточка 1 - Справочник товаров -->
         <div class="bg-white shadow-lg rounded-lg p-6">
           <h2 class="text-xl font-semibold text-gray-800 mb-4">Справочник товаров</h2>
-          <p class="text-gray-600 mb-4">Управляйте всеми товарами на складе.</p>
+          <p class="text-gray-600 mb-4">Управляйте всеми товарами на складе</p>
           <router-link
               to="/directories/product"
               class="text-blue-500 hover:text-blue-700 font-semibold"
@@ -19,7 +19,7 @@
         <!-- Карточка 2 - Справочник категорий -->
         <div class="bg-white shadow-lg rounded-lg p-6">
           <h2 class="text-xl font-semibold text-gray-800 mb-4">Справочник категорий</h2>
-          <p class="text-gray-600 mb-4">Управляйте категориями товаров.</p>
+          <p class="text-gray-600 mb-4">Управляйте категориями товаров</p>
           <router-link
               to="/directories/product-type"
               class="text-blue-500 hover:text-blue-700 font-semibold"
@@ -31,9 +31,21 @@
         <!-- Карточка 3 - Справочник мест хранения -->
         <div class="bg-white shadow-lg rounded-lg p-6">
           <h2 class="text-xl font-semibold text-gray-800 mb-4">Справочник мест хранения</h2>
-          <p class="text-gray-600 mb-4">Управляйте местом хранения.</p>
+          <p class="text-gray-600 mb-4">Управляйте местом хранения</p>
           <router-link
               to="/directories/storage-location"
+              class="text-blue-500 hover:text-blue-700 font-semibold"
+          >
+            Перейти к справочнику
+          </router-link>
+        </div>
+
+        <!-- Карточка 4 - Движение товаров -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Справочник изменений</h2>
+          <p class="text-gray-600 mb-4">Следите за изменениями</p>
+          <router-link
+              to="/directories/audit"
               class="text-blue-500 hover:text-blue-700 font-semibold"
           >
             Перейти к справочнику

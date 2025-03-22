@@ -1,8 +1,9 @@
 <template>
   <div class="min-h-screen bg-gray-100">
-    <Header>
-      Справочник категорий
-    </Header>
+    <Notify ref="notifyRef" />
+
+    <Header>Справочник категорий</Header>
+
     <div class="container mx-auto p-8">
       <Table
           :columns="columns"
@@ -16,21 +17,20 @@
       <!-- Модальное окно для создания или редактирования -->
       <Modal
           :isVisible="isModalVisible"
-          :title="isEditMode ? 'Редактирование категории товара' : 'Создание категории товара'"
+          :title="modalTitle"
           :fields="modalFields"
-          :action-button-text="isEditMode ? 'Сохранить' : 'Создать'"
+          :action-button-text="modalActionText"
           :formData="formData"
           @submit="handleModalSubmit"
           @update:isVisible="isModalVisible = $event"
       />
 
-      <!-- Модальное окно для создания или редактирования -->
+      <!-- Модальное окно для удаления -->
       <Modal
           :isVisible="isDeleteModalVisible"
           title="Подтвердите действие"
           action-button-text="Удалить"
           custom-action-text="Вы уверены, что хотите удалить эту запись?"
-          :fields="deleteModalFields"
           @submit="handleDeleteConfirm"
           @update:isVisible="isDeleteModalVisible = $event"
       />
@@ -38,140 +38,130 @@
   </div>
 </template>
 
-<script>
-import { defineComponent, ref, onMounted } from 'vue';
+<script setup>
+import { ref, computed, onMounted } from "vue";
 import Header from "@/components/common/Header.vue";
 import Table from "@/components/common/Table.vue";
 import Modal from "@/components/common/Modal.vue";
+import Notify from "@/components/common/Notify.vue";
 import {
   getProductTypes,
   createProductType,
   deleteProductType,
   editProductType,
-  getProductType
+  getProductType,
 } from "@/api/productType.js";
 import dayjs from "dayjs";
 
-export default defineComponent({
-  components: {
-    Header,
-    Table,
-    Modal,
-  },
-  setup() {
-    // Reactive state
-    const columns = ref([
-      { key: 'name', label: 'Наименование' },
-      { key: 'shortName', label: 'Краткое наименование' },
-      { key: 'createdAt', label: 'Создано в' },
-    ]);
-    const productTypes = ref([]);
-    const isModalVisible = ref(false);
-    const isDeleteModalVisible = ref(false);
-    const isEditMode = ref(false);
-    const formData = ref({});
-    const modalFields = ref([
-      { name: "name", label: "Наименование", placeholder: "Введите значение" },
-      { name: "shortName", label: "Краткое наименование", placeholder: "Введите значение" },
-    ]);
-    const deleteModalFields = ref([]);
-    const itemToDelete = ref(null);
+const notifyRef = ref(null);
 
-    // Fetch data on component creation
-    const fetchProductType = async () => {
-      try {
-        const response = await getProductTypes();
-        productTypes.value = response.data.map((productType) => ({
-          ...productType,
-          createdAt: dayjs(productType.createdAt).format("YYYY.MM.DD HH:mm:ss"),
-        }));
-      } catch (error) {
-        console.error("Ошибка при загрузке данных:", error);
-      }
-    };
+// Колонки таблицы
+const columns = ref([
+  { key: "name", label: "Наименование" },
+  { key: "shortName", label: "Краткое наименование" },
+  { key: "createdAt", label: "Создано в" },
+]);
 
-    // Open modal for creating a new product type
-    const openCreateModal = () => {
-      isEditMode.value = false;
-      formData.value = {};
-      isModalVisible.value = true;
-    };
+// Состояния
+const productTypes = ref([]);
+const isModalVisible = ref(false);
+const isDeleteModalVisible = ref(false);
+const isEditMode = ref(false);
+const formData = ref({});
+const itemToDelete = ref(null);
 
-    // Handle editing a product type
-    const handleEdit = async (row) => {
-      isEditMode.value = true;
-      try {
-        const response = await getProductType(row.id);
-        formData.value = response.data;
-        isModalVisible.value = true;
-      } catch (error) {
-        console.error("Ошибка при редактировании записи:", error);
-      }
-    };
+// Поля модального окна
+const modalFields = ref([
+  { name: "name", label: "Наименование", placeholder: "Введите значение" },
+  { name: "shortName", label: "Краткое наименование", placeholder: "Введите значение" },
+]);
 
-    // Submit form data for creating or editing
-    const handleModalSubmit = async (data) => {
-      try {
-        if (isEditMode.value) {
-          const response = await editProductType(formData.value.id, data);
-          console.log("Категория товара отредактирована:", response);
-        } else {
-          const response = await createProductType(data);
-          console.log("Категория товара создана:", response);
-        }
-        fetchProductType();
-      } catch (error) {
-        console.error("Ошибка при отправке данных:", error);
-      }
-    };
+// Вычисляемые свойства для заголовка и кнопки модального окна
+const modalTitle = computed(() =>
+    isEditMode.value ? "Редактирование категории товара" : "Создание категории товара"
+);
 
-    // Handle deletion
-    const handleDelete = (row) => {
-      itemToDelete.value = row.id;
-      isDeleteModalVisible.value = true;
-    };
+const modalActionText = computed(() =>
+    isEditMode.value ? "Сохранить" : "Создать"
+);
 
-    // Confirm deletion
-    const handleDeleteConfirm = async () => {
-      if (itemToDelete.value !== null) {
-        try {
-          await deleteProductType(itemToDelete.value);
-          console.log("Категория товара удалена");
-          fetchProductType();
-          isDeleteModalVisible.value = false;
-        } catch (error) {
-          console.error("Ошибка при удалении записи:", error);
-        }
-      }
-    };
-
-    // Refresh data
-    const handleRefresh = () => {
-      fetchProductType();
-    };
-
-    // Load data on creation
-    onMounted(() => {
-      fetchProductType();
-    });
-
-    return {
-      columns,
-      productTypes,
-      isModalVisible,
-      isDeleteModalVisible,
-      isEditMode,
-      formData,
-      modalFields,
-      deleteModalFields,
-      itemToDelete,
-      openCreateModal,
-      handleEdit,
-      handleModalSubmit,
-      handleDelete,
-      handleDeleteConfirm,
-      handleRefresh
-    };
+// Загрузка данных
+const fetchProductTypes = async () => {
+  try {
+    const response = await getProductTypes();
+    if (Array.isArray(response)) {
+      productTypes.value = response.map(item => ({
+        ...item,
+        createdAt: dayjs(item.createdAt).format("YYYY.MM.DD HH:mm:ss"),
+      }));
+    }
+  } catch (error) {
+    console.error("Ошибка при загрузке данных:", error);
+    notifyRef.value?.showNotify("Ошибка загрузки категорий", "error");
   }
-});
+};
+
+// Открытие модального окна для создания
+const openCreateModal = () => {
+  isEditMode.value = false;
+  formData.value = {};
+  isModalVisible.value = true;
+};
+
+// Открытие модального окна для редактирования
+const handleEdit = async (row) => {
+  isEditMode.value = true;
+  try {
+    formData.value = await getProductType(row.id);
+    isModalVisible.value = true;
+  } catch (error) {
+    console.error("Ошибка при редактировании:", error);
+    notifyRef.value?.showNotify("Ошибка при редактировании категории", "error");
+  }
+};
+
+// Обработка создания/редактирования
+const handleModalSubmit = async (data) => {
+  try {
+    if (isEditMode.value) {
+      await editProductType(formData.value.id, data);
+      notifyRef.value?.showNotify("Категория успешно обновлена", "success");
+    } else {
+      await createProductType(data);
+      notifyRef.value?.showNotify("Категория успешно добавлена", "success");
+    }
+    await fetchProductTypes();
+    isModalVisible.value = false;
+  } catch (error) {
+    console.error("Ошибка при сохранении:", error);
+    notifyRef.value?.showNotify("Ошибка при сохранении категории", "error");
+  }
+};
+
+// Обработка удаления
+const handleDelete = (row) => {
+  itemToDelete.value = row.id;
+  isDeleteModalVisible.value = true;
+};
+
+// Подтверждение удаления
+const handleDeleteConfirm = async () => {
+  try {
+    await deleteProductType(itemToDelete.value);
+    notifyRef.value?.showNotify("Категория успешно удалена", "success");
+    await fetchProductTypes();
+    isDeleteModalVisible.value = false;
+  } catch (error) {
+    console.error("Ошибка при удалении:", error);
+    notifyRef.value?.showNotify("Ошибка при удалении категории", "error");
+  }
+};
+
+// Обновление данных
+const handleRefresh = async () => {
+  await fetchProductTypes();
+};
+
+// Загрузка данных при монтировании
+onMounted(fetchProductTypes);
 </script>

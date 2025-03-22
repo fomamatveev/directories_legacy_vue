@@ -1,5 +1,7 @@
 <template>
   <div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <Notify ref="notifyRef" />
+
     <div class="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
       <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Добро пожаловать</h2>
 
@@ -12,7 +14,7 @@
               v-model="username"
               required
               class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter your username"
+              placeholder="Введите ваш логин"
           />
         </div>
 
@@ -24,12 +26,11 @@
               v-model="password"
               required
               class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter your password"
+              placeholder="Введите ваш пароль"
           />
-          <!-- Иконка глаза -->
           <button
               type="button"
-              class="absolute right-3 flex items-center"
+              class="absolute right-3 top-9 flex items-center"
               @click="togglePasswordVisibility"
           >
             <svg
@@ -81,31 +82,34 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { login } from "@/api/auth";
+import Notify from "~/components/common/Notify.vue";
 
-export default {
-  data() {
-    return {
-      username: '',
-      password: '',
-      showPassword: false, // Управление видимостью пароля
-    };
-  },
-  methods: {
-    async handleLogin() {
-      try {
-        const response = await login(this.username, this.password);
-        console.log("Login successful:", response);
-        this.$router.push('/dashboard')
-        // Redirect or handle success
-      } catch (error) {
-        console.error("Login failed:", error);
-      }
-    },
-    togglePasswordVisibility() {
-      this.showPassword = !this.showPassword;
-    },
-  },
+const notifyRef = ref(null);
+const router = useRouter();
+const route = useRoute();
+
+const username = ref('');
+const password = ref('');
+const showPassword = ref(false);
+
+const handleLogin = async () => {
+  try {
+    await login(username.value, password.value);
+
+    // Перенаправляем пользователя на ту страницу, куда он хотел попасть
+    const redirectPath = route.query.redirect || '/dashboard';
+    router.push(redirectPath);
+  } catch (error) {
+    console.error('Ошибка входа:', error);
+    notifyRef.value?.showNotify('Ошибка входа! Проверьте логин и пароль', 'error');
+  }
+};
+
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
 };
 </script>

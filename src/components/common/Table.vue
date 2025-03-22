@@ -1,19 +1,22 @@
 <template>
   <div class="bg-white shadow-lg rounded-lg p-6">
-    <div class="flex justify-self-auto items-center mb-4">
+    <div v-if="isShowCreateButton || isShowRefreshButton" class="flex items-center mb-4">
       <button
+          v-if="isShowCreateButton"
           class="bg-blue-600 text-white py-2 px-4 mr-2 rounded-md hover:bg-blue-700 focus:outline-none"
-          @click="create"
+          @click="emit('create')"
       >
         Создать
       </button>
       <button
+          v-if="isShowRefreshButton"
           class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none"
-          @click="refresh"
+          @click="emit('refresh')"
       >
         Обновить
       </button>
     </div>
+
     <table class="min-w-full border border-gray-300">
       <thead>
       <tr class="bg-gray-200">
@@ -24,7 +27,7 @@
         >
           {{ column.label }}
         </th>
-        <th class="py-2 px-4 text-left text-gray-700">Действия</th>
+        <th v-if="isShowEditButton || isShowDeleteButton" class="py-2 px-4 text-left text-gray-700">Действия</th>
       </tr>
       </thead>
       <tbody>
@@ -40,16 +43,18 @@
         >
           {{ row[column.key] }}
         </td>
-        <td class="py-2 px-4 border-b border-gray-300 flex space-x-2">
+        <td v-if="isShowEditButton || isShowDeleteButton" class="py-2 px-4 border-b border-gray-300 flex space-x-2">
           <button
+              v-if="isShowEditButton"
               class="bg-yellow-500 text-white py-1 px-3 rounded-md hover:bg-yellow-600 focus:outline-none"
-              @click="edit(row)"
+              @click="emit('edit', row)"
           >
             Редактировать
           </button>
           <button
+              v-if="isShowDeleteButton"
               class="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 focus:outline-none"
-              @click="deleteItem(row)"
+              @click="emit('delete', row)"
           >
             Удалить
           </button>
@@ -60,43 +65,19 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from 'vue';
+<script setup>
+import { defineProps, defineEmits } from "vue";
 
-export default defineComponent({
-  props: {
-    columns: {
-      type: Array,
-      required: true,
-    },
-    data: {
-      type: Array,
-      required: true,
-    },
-  },
-  setup(props, { emit }) {
-    const create = () => {
-      emit('create');
-    };
-
-    const refresh = () => {
-      emit('refresh');
-    };
-
-    const edit = (row) => {
-      emit('edit', row);
-    };
-
-    const deleteItem = (row) => {
-      emit('delete', row);
-    };
-
-    return {
-      create,
-      refresh,
-      edit,
-      deleteItem,
-    };
-  },
+// Определение пропсов
+const props = defineProps({
+  columns: Array,
+  data: Array,
+  isShowCreateButton: { type: Boolean, default: true },
+  isShowRefreshButton: { type: Boolean, default: true },
+  isShowEditButton: { type: Boolean, default: true },
+  isShowDeleteButton: { type: Boolean, default: true },
 });
+
+// Определение событий
+const emit = defineEmits(["create", "refresh", "edit", "delete"]);
 </script>

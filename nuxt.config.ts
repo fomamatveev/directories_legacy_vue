@@ -9,5 +9,9 @@ export default defineNuxtConfig({
             autoprefixer: {},
         },
     },
-    plugins: ['@/plugins/axios.js'],
+    runtimeConfig: {
+        public: {
+            apiBase: 'http://localhost:5000'
+        }
+    }
 });

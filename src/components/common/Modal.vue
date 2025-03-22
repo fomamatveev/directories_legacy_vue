@@ -50,39 +50,40 @@
           >
             Отмена
           </button>
-          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">{{ actionButtonText }}</button>
+          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
+            {{ actionButtonText }}
+          </button>
         </div>
       </form>
     </div>
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
+import { defineProps, defineEmits } from "vue";
 
-export default defineComponent({
-  props: {
-    isVisible: Boolean,
-    title: String,
-    fields: Array,
-    formData: Object,
-    actionButtonText: String,
-    customActionText: {
-      type: String,
-      default: '', // по умолчанию пустая строка
-    },
-  },
-  emits: ["submit", "update:isVisible"],
-  methods: {
-    handleSubmit() {
-      this.$emit("submit", this.formData);
-      this.$emit("update:isVisible", false);
-    },
-    handleCancel() {
-      this.$emit("update:isVisible", false); // Закрыть модальное окно
-    },
-  },
+// Определение пропсов
+const props = defineProps({
+  isVisible: Boolean,
+  title: String,
+  fields: Array,
+  formData: Object,
+  actionButtonText: String,
+  customActionText: { type: String, default: "" },
 });
+
+// Определение событий
+const emit = defineEmits(["submit", "update:isVisible"]);
+
+// Методы
+const handleSubmit = () => {
+  emit("submit", props.formData);
+  emit("update:isVisible", false);
+};
+
+const handleCancel = () => {
+  emit("update:isVisible", false);
+};
 </script>
 
 <style scoped>

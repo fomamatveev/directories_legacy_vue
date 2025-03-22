@@ -1,54 +1,66 @@
 export const getStorageLocations = async () => {
-    const { $axios } = useNuxtApp();
-
     try {
-        return await $axios.get('/StorageLocation'); // Возвращаем ответ с данными
+        const config = useRuntimeConfig();
+        return await $fetch(`${config.public.apiBase}/StorageLocation`, {
+            method: 'GET',
+            credentials: 'include', // Для работы с куки
+        });
     } catch (error) {
-        console.error("Ошибка при получении данных мест хранения:", error);
-        throw error; // Пробрасываем ошибку для обработки в компоненте
+        console.error("Ошибка при получении мест хранения:", error);
+        throw error;
     }
 };
 
 export const getStorageLocation = async (id) => {
-    const { $axios } = useNuxtApp();
-
     try {
-        return await $axios.get(`/StorageLocation/${id}`); // Возвращаем данные конкретного мест хранения
+        const config = useRuntimeConfig();
+        return await $fetch(`${config.public.apiBase}/StorageLocation/${id}`, {
+            method: 'GET',
+            credentials: 'include', // Для работы с куки
+        });
     } catch (error) {
-        console.error("Ошибка при получении данных для мест хранения:", error);
-        throw error; // Пробрасываем ошибку для обработки в компоненте
+        console.error("Ошибка при получении места хранения:", error);
+        throw error;
     }
 };
 
 export const createStorageLocation = async (data) => {
-    const { $axios } = useNuxtApp();
-
     try {
-        return await $axios.post('/StorageLocation', data); // Возвращаем результат создания
+        const config = useRuntimeConfig();
+        return await $fetch(`${config.public.apiBase}/StorageLocation`, {
+            method: "POST",
+            body: data,
+            credentials: "include",
+        });
     } catch (error) {
-        console.error("Ошибка при создании мест хранения:", error);
-        throw error; // Пробрасываем ошибку для обработки в компоненте
+        console.error("Ошибка при создании места хранения:", error);
+        throw error;
     }
 };
 
 export const editStorageLocation = async (id, data) => {
-    const { $axios } = useNuxtApp();
-
     try {
-        return await $axios.put(`/StorageLocation/${id}`, data); // Возвращаем результат редактирования
+        const config = useRuntimeConfig();
+        return await $fetch(`${config.public.apiBase}/StorageLocation/${id}`, {
+            method: "PUT",
+            body: data,
+            credentials: "include",
+        });
     } catch (error) {
-        console.error("Ошибка при редактировании мест хранения:", error);
-        throw error; // Пробрасываем ошибку для обработки в компоненте
+        console.error("Ошибка при редактировании места хранения:", error);
+        throw error;
     }
 };
 
 export const deleteStorageLocation = async (id) => {
-    const { $axios } = useNuxtApp();
-
     try {
-        return await $axios.delete(`/StorageLocation/${id}`); // Возвращаем результат удаления
+        const config = useRuntimeConfig();
+        return await $fetch(`${config.public.apiBase}/StorageLocation/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+        });
     } catch (error) {
-        console.error("Ошибка при удалении мест хранения:", error);
-        throw error; // Пробрасываем ошибку для обработки в компоненте
+        console.error("Ошибка при удалении места хранения:", error);
+        throw error;
     }
 };

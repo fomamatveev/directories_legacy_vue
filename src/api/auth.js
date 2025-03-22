@@ -1,41 +1,26 @@
 export const login = async (username, password) => {
-    const { $axios } = useNuxtApp();  // Получаем $axios через useNuxtApp()
-
     try {
-        const response = await $axios.post('/auth/login', {
-            username,
-            password,
+        const config = useRuntimeConfig();
+        return await $fetch(`${config.public.apiBase}/auth/login`, {
+            method: 'POST',
+            body: {username, password},
+            credentials: 'include', // Для работы с куки
         });
-        return response.data; // Возвращаем данные, если запрос успешен
     } catch (error) {
-        console.error('Login error:', error);
-        throw error; // Если ошибка, выбрасываем её дальше
-    }
-};
-
-export const register = async (username, password) => {
-    const { $axios } = useNuxtApp();  // Получаем $axios через useNuxtApp()
-
-    try {
-        const response = await $axios.post('/auth/register', {
-            username,
-            password,
-        });
-        return response.data; // Возвращаем данные, если запрос успешен
-    } catch (error) {
-        console.error('Registration error:', error);
-        throw error; // Если ошибка, выбрасываем её дальше
+        console.error('Ошибка входа:', error);
+        throw error;
     }
 };
 
 export const logout = async () => {
-    const { $axios } = useNuxtApp();  // Получаем $axios через useNuxtApp()
-
     try {
-        const response = await $axios.post('/auth/logout');
-        return response.data; // Возвращаем данные, если запрос успешен
+        const config = useRuntimeConfig();
+        return await $fetch(`${config.public.apiBase}/auth/logout`, {
+            method: 'POST',
+            credentials: 'include',
+        });
     } catch (error) {
-        console.error('Logout error:', error);
-        throw error; // Если ошибка, выбрасываем её дальше
+        console.error('Ошибка выхода:', error);
+        throw error;
     }
 };

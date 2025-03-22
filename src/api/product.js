@@ -1,54 +1,66 @@
 export const getProducts = async () => {
-    const { $axios } = useNuxtApp();
-
     try {
-        return await $axios.get('/Product'); // Возвращаем ответ с данными
+        const config = useRuntimeConfig();
+        return await $fetch(`${config.public.apiBase}/Product`, {
+            method: 'GET',
+            credentials: 'include',
+        });
     } catch (error) {
-        console.error("Ошибка при получении данных мест хранения:", error);
-        throw error; // Пробрасываем ошибку для обработки в компоненте
+        console.error("Ошибка при получении списка продуктов:", error);
+        throw error;
     }
 };
 
 export const getProduct = async (id) => {
-    const { $axios } = useNuxtApp();
-
     try {
-        return await $axios.get(`/Product/${id}`); // Возвращаем данные конкретного мест хранения
+        const config = useRuntimeConfig();
+        return await $fetch(`${config.public.apiBase}/Product/${id}`, {
+            method: 'GET',
+            credentials: 'include',
+        });
     } catch (error) {
-        console.error("Ошибка при получении данных для мест хранения:", error);
-        throw error; // Пробрасываем ошибку для обработки в компоненте
+        console.error("Ошибка при получении данных продукта:", error);
+        throw error;
     }
 };
 
 export const createProduct = async (data) => {
-    const { $axios } = useNuxtApp();
-
     try {
-        return await $axios.post('/Product', data); // Возвращаем результат создания
+        const config = useRuntimeConfig();
+        return await $fetch(`${config.public.apiBase}/Product`, {
+            method: 'POST',
+            body: data,
+            credentials: 'include',
+        });
     } catch (error) {
-        console.error("Ошибка при создании мест хранения:", error);
-        throw error; // Пробрасываем ошибку для обработки в компоненте
+        console.error("Ошибка при создании продукта:", error);
+        throw error;
     }
 };
 
 export const editProduct = async (id, data) => {
-    const { $axios } = useNuxtApp();
-
     try {
-        return await $axios.put(`/Product/${id}`, data); // Возвращаем результат редактирования
+        const config = useRuntimeConfig();
+        return await $fetch(`${config.public.apiBase}/Product/${id}`, {
+            method: 'PUT',
+            body: data,
+            credentials: 'include',
+        });
     } catch (error) {
-        console.error("Ошибка при редактировании мест хранения:", error);
-        throw error; // Пробрасываем ошибку для обработки в компоненте
+        console.error("Ошибка при редактировании продукта:", error);
+        throw error;
     }
 };
 
 export const deleteProduct = async (id) => {
-    const { $axios } = useNuxtApp();
-
     try {
-        return await $axios.delete(`/Product/${id}`); // Возвращаем результат удаления
+        const config = useRuntimeConfig();
+        return await $fetch(`${config.public.apiBase}/Product/${id}`, {
+            method: 'DELETE',
+            credentials: 'include',
+        });
     } catch (error) {
-        console.error("Ошибка при удалении мест хранения:", error);
-        throw error; // Пробрасываем ошибку для обработки в компоненте
+        console.error("Ошибка при удалении продукта:", error);
+        throw error;
     }
 };
