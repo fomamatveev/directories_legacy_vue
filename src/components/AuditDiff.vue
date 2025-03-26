@@ -2,19 +2,22 @@
   <div class="diff-container">
     <template v-if="!hasVisibleChanges">Нет изменений</template>
     <template v-else>
-      <div v-for="(change, field) in visibleChanges" :key="field" class="change-row">
-        <div class="field-name">{{ getFieldName(field) }}:</div>
-        <div class="change-values">
-          <div v-if="showOldValue(change)" class="old-value">
-            <span class="diff-sign">-</span>
-            <span>{{ formatValue(field, change.oldValue) }}</span>
-          </div>
-          <div v-if="showNewValue(change)" class="new-value">
-            <span class="diff-sign">+</span>
-            <span>{{ formatValue(field, change.newValue) }}</span>
+      <template v-for="(change, field, index) in visibleChanges" :key="field">
+        <div class="change-row">
+          <div class="field-name">{{ getFieldName(field) }}:</div>
+          <div class="change-values">
+            <div v-if="showOldValue(change)" class="old-value">
+              <span class="diff-sign">-</span>
+              <span class="value-text">{{ formatValue(field, change.oldValue) }}</span>
+            </div>
+            <div v-if="showNewValue(change)" class="new-value">
+              <span class="diff-sign">+</span>
+              <span class="value-text">{{ formatValue(field, change.newValue) }}</span>
+            </div>
           </div>
         </div>
-      </div>
+        <div v-if="index < Object.keys(visibleChanges).length - 1" class="divider"></div>
+      </template>
     </template>
   </div>
 </template>
@@ -120,21 +123,26 @@ const formatValue = (field, value) => {
 
 .change-row {
   display: flex;
-  padding: 6px 12px;
+  padding: 8px 16px;
   align-items: flex-start;
   transition: background-color 0.2s;
 }
 
 .change-row:hover {
-  background-color: white;
-  border-radius: 6px;
+  background-color: #f5f5f5;
+}
+
+.divider {
+  height: 1px;
+  background-color: #eaeaea;
+  margin: 4px 16px;
 }
 
 .field-name {
   font-weight: 500;
   color: #555;
-  min-width: 140px;
-  padding-right: 12px;
+  min-width: 160px;
+  padding-right: 16px;
   text-align: left;
 }
 
@@ -146,35 +154,40 @@ const formatValue = (field, value) => {
 .old-value, .new-value {
   display: flex;
   align-items: center;
-  margin-bottom: 4px;
-  padding: 4px 8px;
+  margin-bottom: 6px;
+  padding: 6px 10px;
   border-radius: 4px;
 }
 
 .old-value {
   background-color: #fff0f0;
   color: #d32f2f;
-}
-
-.old-value .diff-sign {
-  color: #d32f2f;
-  font-size: 14px;
+  border-left: 3px solid #ffcdd2;
 }
 
 .new-value {
   background-color: #f0fff0;
   color: #388e3c;
+  border-left: 3px solid #c8e6c9;
 }
 
-.new-value .diff-sign {
-  color: #388e3c;
+.diff-sign {
+  font-weight: bold;
+  margin-right: 6px;
+  min-width: 16px;
+  text-align: center;
   font-size: 14px;
 }
 
-/* Анимация для изменённых значений */
+.value-text {
+  padding-left: 4px;
+  word-break: break-word;
+}
+
+/* Анимация */
 @keyframes fadeIn {
-  from { opacity: 0.5; }
-  to { opacity: 1; }
+  from { opacity: 0.5; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .old-value, .new-value {

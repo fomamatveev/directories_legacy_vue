@@ -66,7 +66,11 @@ const processedActions = computed(() => {
 
 const fetchActions = async () => {
   try {
-    actions.value = await getActions()
+    const response = await getActions();
+    actions.value = response.map(action => ({
+      ...action,
+      updatedAt: dayjs(action.updatedAt).format("YYYY.MM.DD HH:mm:ss"),
+    }));
   } catch (error) {
     console.error('Ошибка при загрузке данных:', error)
     notifyRef.value?.showNotify('Ошибка загрузки данных', 'error')
