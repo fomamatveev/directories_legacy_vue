@@ -2,125 +2,112 @@
   <div class="diff-container">
     <template v-if="!hasVisibleChanges">Нет изменений</template>
     <template v-else>
-      <template v-for="(change, field, index) in visibleChanges" :key="field">
-        <div class="change-row">
-          <div class="field-name">{{ getFieldName(field) }}:</div>
-          <div class="change-values">
-            <div v-if="shouldShowOldValue(change)" class="old-value">
-              <span class="diff-sign">-</span>
-              <span>{{ formatValue(change.oldValue) }}</span>
-            </div>
-            <div v-if="shouldShowNewValue(change)" class="new-value">
-              <span class="diff-sign">+</span>
-              <span>{{ formatValue(change.newValue) }}</span>
-            </div>
+      <div v-for="(change, field) in visibleChanges" :key="field" class="change-row">
+        <div class="field-name">{{ getFieldName(field) }}:</div>
+        <div class="change-values">
+          <div v-if="showOldValue(change)" class="old-value">
+            <span class="diff-sign">-</span>
+            <span>{{ formatValue(field, change.oldValue) }}</span>
+          </div>
+          <div v-if="showNewValue(change)" class="new-value">
+            <span class="diff-sign">+</span>
+            <span>{{ formatValue(field, change.newValue) }}</span>
           </div>
         </div>
-        <div v-if="index < Object.keys(visibleChanges).length - 1" class="divider"></div>
-      </template>
+      </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import dayjs from 'dayjs';
-import fieldNames from '@/utils/fieldNames';
-import auditConfig from '@/utils/auditConfig';
+import { computed, ref } from 'vue'
+import dayjs from 'dayjs'
+import fieldNames from '@/utils/fieldNames'
+import auditConfig from '@/utils/auditConfig'
+import referenceService from '@/services/referenceService'
 
 const props = defineProps({
   changes: String,
-  operation: String
-});
+  operation: String,
+  entityName: String
+})
 
-// Парсим изменения
+const loadedReferences = ref({})
+
 const changesData = computed(() => {
   try {
-    return props.changes ? JSON.parse(props.changes)?.changes : null;
+    return props.changes ? JSON.parse(props.changes)?.changes : null
   } catch {
-    return null;
+    return null
   }
-});
+})
 
-// Проверяем, является ли значение "пустым"
 const isEmptyValue = (value) => {
-  return value === null ||
-      value === undefined ||
-      value === '' ||
-      (typeof value === 'object' && Object.keys(value).length === 0);
-};
+  return value === null || value === undefined || value === ''
+}
 
-// Фильтруем изменения, оставляя только значимые
+const isDate = (value) => {
+  return typeof value === 'string' && !isNaN(Date.parse(value)) && value.includes('-')
+}
+
 const visibleChanges = computed(() => {
-  if (!changesData.value) return {};
+  if (!changesData.value) return {}
 
-  const result = {};
-
+  const result = {}
   for (const [field, change] of Object.entries(changesData.value)) {
-    // Пропускаем технические поля
-    if (auditConfig.ignoredFields.includes(field)) continue;
+    if (auditConfig.ignoredFields.includes(field)) continue
 
-    const oldEmpty = isEmptyValue(change.oldValue);
-    const newEmpty = isEmptyValue(change.newValue);
+    const oldEmpty = isEmptyValue(change.oldValue)
+    const newEmpty = isEmptyValue(change.newValue)
 
-    // Пропускаем поля, где оба значения пустые
-    if (oldEmpty && newEmpty) continue;
-
-    // Пропускаем поля без изменений (кроме случаев, когда одно из значений undefined)
-    if (change.oldValue === change.newValue &&
-        change.oldValue !== undefined &&
-        change.newValue !== undefined) continue;
-
-    result[field] = change;
+    if (!oldEmpty || !newEmpty) {
+      result[field] = change
+      // Предзагрузка reference данных
+      if (field.endsWith('Id')) {
+        const id = change.newValue || change.oldValue
+        if (id) {
+          const entityType = field === 'ProductTypeId' ? 'ProductType' : 'StorageLocation'
+          referenceService.loadReference(entityType, id)
+        }
+      }
+    }
   }
+  return result
+})
 
-  return result;
-});
-
-// Проверяем есть ли вообще изменения для отображения
 const hasVisibleChanges = computed(() => {
-  return Object.keys(visibleChanges.value).length > 0;
-});
+  return Object.keys(visibleChanges.value).length > 0
+})
 
-// Проверяем нужно ли показывать старое значение
-const shouldShowOldValue = (change) => {
-  return change.oldValue !== undefined && !isEmptyValue(change.oldValue);
-};
+const showOldValue = (change) => {
+  return change.oldValue !== undefined && !isEmptyValue(change.oldValue)
+}
 
-// Проверяем нужно ли показывать новое значение
-const shouldShowNewValue = (change) => {
-  return change.newValue !== undefined && !isEmptyValue(change.newValue);
-};
+const showNewValue = (change) => {
+  return change.newValue !== undefined && !isEmptyValue(change.newValue)
+}
 
-// Получаем читаемое имя поля
 const getFieldName = (field) => {
-  return fieldNames[field] || field;
-};
+  return fieldNames[field] || field
+}
 
-// Форматируем значение для отображения
-const formatValue = (value) => {
-  if (isEmptyValue(value)) return 'не указано';
+const formatValue = (field, value) => {
+  if (isEmptyValue(value)) return 'не указано'
 
-  // Проверяем, является ли значение датой
-  const isDate = (val) => {
-    // Исключаем числа и булевы значения
-    if (typeof val !== 'string') return false;
-
-    // Проверяем стандартные форматы дат
-    const isoDatePattern = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?)?$/;
-    return isoDatePattern.test(val) && !isNaN(Date.parse(val));
-  };
+  // Обработка reference полей
+  if (field.endsWith('Id') && typeof value === 'number') {
+    const entityType = field === 'ProductTypeId' ? 'ProductType' : 'StorageLocation'
+    const name = referenceService.getReferenceName(entityType, value)
+    return `${value} (${name})`
+  }
 
   if (isDate(value)) {
-    return dayjs(value).format('YYYY.MM.DD HH:mm:ss');
+    return dayjs(value).format('DD.MM.YYYY HH:mm:ss')
   }
 
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-
-  return value.toString();
-};
+  if (typeof value === 'object') return JSON.stringify(value)
+  return value.toString()
+}
 </script>
 
 <style scoped>
@@ -141,12 +128,6 @@ const formatValue = (value) => {
 .change-row:hover {
   background-color: white;
   border-radius: 6px;
-}
-
-.divider {
-  height: 1px;
-  background-color: #f0f0f0;
-  margin: 4px 12px;
 }
 
 .field-name {
@@ -188,11 +169,6 @@ const formatValue = (value) => {
 .new-value .diff-sign {
   color: #388e3c;
   font-size: 14px;
-}
-
-.value-text {
-  padding-left: 4px;
-  word-break: break-word;
 }
 
 /* Анимация для изменённых значений */

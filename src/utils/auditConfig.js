@@ -6,8 +6,6 @@ export default {
         'UpdatedAt',
         'CreatedBy',
         'UpdatedBy',
-        'ProductTypeId',
-        'StorageLocationId'
     ],
 
     // Поля, которые требуют специального форматирования
