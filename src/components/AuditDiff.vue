@@ -23,11 +23,11 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onUnmounted } from 'vue'
 import dayjs from 'dayjs'
 import fieldNames from '@/utils/fieldNames'
 import auditConfig from '@/utils/auditConfig'
-import referenceService from '@/services/referenceService'
+import useReferenceService from '@/services/referenceService'
 
 const props = defineProps({
   changes: String,
@@ -35,7 +35,12 @@ const props = defineProps({
   entityName: String
 })
 
-const loadedReferences = ref({})
+const { loadReference, getReferenceName, cleanup } = useReferenceService()
+
+// Очистка при размонтировании компонента
+onUnmounted(() => {
+  cleanup()
+})
 
 const changesData = computed(() => {
   try {
@@ -65,12 +70,14 @@ const visibleChanges = computed(() => {
 
     if (!oldEmpty || !newEmpty) {
       result[field] = change
-      // Предзагрузка reference данных
+      // Предзагрузка reference данных с обработкой ошибок
       if (field.endsWith('Id')) {
         const id = change.newValue || change.oldValue
         if (id) {
           const entityType = field === 'ProductTypeId' ? 'ProductType' : 'StorageLocation'
-          referenceService.loadReference(entityType, id)
+          loadReference(entityType, id).catch(() => {
+            // Ошибки уже обрабатываются в referenceService
+          })
         }
       }
     }
@@ -100,7 +107,7 @@ const formatValue = (field, value) => {
   // Обработка reference полей
   if (field.endsWith('Id') && typeof value === 'number') {
     const entityType = field === 'ProductTypeId' ? 'ProductType' : 'StorageLocation'
-    const name = referenceService.getReferenceName(entityType, value)
+    const name = getReferenceName(entityType, value)
     return `${value} (${name})`
   }
 
@@ -112,7 +119,6 @@ const formatValue = (field, value) => {
   return value.toString()
 }
 </script>
-
 <style scoped>
 .diff-container {
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
@@ -129,7 +135,8 @@ const formatValue = (field, value) => {
 }
 
 .change-row:hover {
-  background-color: #f5f5f5;
+  background-color: white;
+  border-radius: 6px;
 }
 
 .divider {

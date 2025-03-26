@@ -7,6 +7,8 @@ export default {
     UpdatedAt: 'Дата изменения',
     UpdatedBy: 'Кем изменено',
 
+    Username: 'Пользователь',
+
     // Поля для Товаров
     Description: 'Описание',
     Quantity: 'Кол-во',

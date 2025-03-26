@@ -6,6 +6,8 @@ export default {
         'UpdatedAt',
         'CreatedBy',
         'UpdatedBy',
+        'PasswordHash',
+        'PasswordSalt'
     ],
 
     // Поля, которые требуют специального форматирования
