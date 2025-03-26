@@ -41,7 +41,10 @@
             :key="column.key"
             class="py-2 px-4 border-b border-gray-300"
         >
-          {{ row[column.key] }}
+          <!-- Поддержка кастомных слотов -->
+          <slot :name="'cell(' + column.key + ')'" :value="row[column.key]" :row="row">
+            {{ row[column.key] }}
+          </slot>
         </td>
         <td v-if="isShowEditButton || isShowDeleteButton" class="py-2 px-4 border-b border-gray-300 flex space-x-2">
           <button
@@ -68,8 +71,7 @@
 <script setup>
 import { defineProps, defineEmits } from "vue";
 
-// Определение пропсов
-const props = defineProps({
+defineProps({
   columns: Array,
   data: Array,
   isShowCreateButton: { type: Boolean, default: true },
@@ -78,6 +80,5 @@ const props = defineProps({
   isShowDeleteButton: { type: Boolean, default: true },
 });
 
-// Определение событий
 const emit = defineEmits(["create", "refresh", "edit", "delete"]);
 </script>

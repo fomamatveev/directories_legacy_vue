@@ -14,7 +14,11 @@
           :columns="columns"
           :data="actions"
           @refresh="handleRefresh"
-      />
+      >
+        <template #cell(changes)="{ value, row }">
+          <AuditDiff :changes="value" :operation="row.operation" />
+        </template>
+      </Table>
     </div>
   </div>
 </template>
@@ -26,12 +30,28 @@ import Table from "@/components/common/Table.vue";
 import { getActions } from "@/api/audit.js";
 import dayjs from "dayjs";
 import Notify from "~/components/common/Notify.vue";
+import AuditDiff from "@/components/AuditDiff.vue";
 
 const columns = [
-  { key: "action", label: "Действие" },
+  {
+    key: "action",
+    label: "Действие",
+    formatter: value => {
+      const actions = {
+        'Create': 'Создание',
+        'Update': 'Изменение',
+        'Delete': 'Удаление'
+      };
+      return actions[value] || value;
+    }
+  },
   { key: "entityName", label: "Наименование сущности" },
   { key: "changes", label: "Изменения" },
-  { key: "updatedAt", label: "Дата действия" },
+  {
+    key: "updatedAt",
+    label: "Дата действия",
+    formatter: value => dayjs(value).format("YYYY.MM.DD HH:mm:ss")
+  },
   { key: "updatedBy", label: "Кем изменено" },
 ];
 
@@ -43,11 +63,11 @@ const fetchActions = async () => {
     const response = await getActions();
     actions.value = response.map(action => ({
       ...action,
-      createdAt: dayjs(action.createdAt).format("YYYY.MM.DD HH:mm:ss"),
+      updatedAt: dayjs(action.updatedAt).format("YYYY.MM.DD HH:mm:ss"),
     }));
   } catch (error) {
-    console.error("Ошибка при загрузке товаров:", error);
-    notifyRef.value?.showNotify("Ошибка загрузки товаров", "error");
+    console.error("Ошибка при загрузке данных:", error);
+    notifyRef.value?.showNotify("Ошибка загрузки данных", "error");
   }
 };
 
