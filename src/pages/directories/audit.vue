@@ -32,6 +32,9 @@ import {getActions} from '@/api/audit.js'
 import dayjs from 'dayjs'
 import Notify from '~/components/common/Notify.vue'
 import AuditDiff from '@/components/AuditDiff.vue'
+import {authMiddleware} from "~/middleware/auth.js";
+
+definePageMeta({ middleware: authMiddleware(true) })
 
 const columns = [
   {

@@ -52,6 +52,9 @@ import {
   getProductType,
 } from "@/api/productType.js";
 import dayjs from "dayjs";
+import {authMiddleware} from "~/middleware/auth.js";
+
+definePageMeta({ middleware: authMiddleware(true) })
 
 const notifyRef = ref(null);
 

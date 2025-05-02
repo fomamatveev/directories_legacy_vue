@@ -24,3 +24,18 @@ export const logout = async () => {
         throw error;
     }
 };
+
+export const getMe = async () => {
+    try {
+        const config = useRuntimeConfig();
+
+        await $fetch(`${config.public.apiBase}/auth/getme`, {
+            method: 'GET',
+            credentials: 'include',
+        });
+
+        return true;
+    } catch (error) {
+        return false;
+    }
+};

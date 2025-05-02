@@ -59,6 +59,9 @@
 <script>
 import { defineComponent } from 'vue';
 import Header from "@/components/common/Header.vue";
+import {authMiddleware} from "~/middleware/auth.js";
+
+definePageMeta({ middleware: authMiddleware(true) })
 
 export default defineComponent({
   components: {

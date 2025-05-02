@@ -48,6 +48,9 @@ import { getProducts, createProduct, editProduct, deleteProduct, getProduct } fr
 import { getProductTypes } from "@/api/productType.js";
 import { getStorageLocations } from "@/api/storageLocation.js";
 import dayjs from "dayjs";
+import {authMiddleware} from "~/middleware/auth.js";
+
+definePageMeta({ middleware: authMiddleware(true) })
 
 const notifyRef = ref(null);
 

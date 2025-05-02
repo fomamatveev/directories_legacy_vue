@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@vueuse/shared": "^13.1.0",
     "axios": "^1.7.9",
     "dayjs": "^1.11.13",
     "dayjs-plugin-utc": "^0.1.2",
