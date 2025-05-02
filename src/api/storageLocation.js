@@ -1,7 +1,9 @@
+import {getApiUrl} from "~/api/config.js";
+
 export const getStorageLocations = async () => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/StorageLocation`, {
+        return await $fetch(`${getApiUrl()}/StorageLocation`, {
             method: 'GET',
             credentials: 'include', // Для работы с куки
         });
@@ -14,7 +16,7 @@ export const getStorageLocations = async () => {
 export const getStorageLocation = async (id) => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/StorageLocation/${id}`, {
+        return await $fetch(`${getApiUrl()}/StorageLocation/${id}`, {
             method: 'GET',
             credentials: 'include', // Для работы с куки
         });
@@ -27,7 +29,7 @@ export const getStorageLocation = async (id) => {
 export const createStorageLocation = async (data) => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/StorageLocation`, {
+        return await $fetch(`${getApiUrl()}/StorageLocation`, {
             method: "POST",
             body: data,
             credentials: "include",
@@ -41,7 +43,7 @@ export const createStorageLocation = async (data) => {
 export const editStorageLocation = async (id, data) => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/StorageLocation/${id}`, {
+        return await $fetch(`${getApiUrl()}/StorageLocation/${id}`, {
             method: "PUT",
             body: data,
             credentials: "include",
@@ -55,7 +57,7 @@ export const editStorageLocation = async (id, data) => {
 export const deleteStorageLocation = async (id) => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/StorageLocation/${id}`, {
+        return await $fetch(`${getApiUrl()}/StorageLocation/${id}`, {
             method: "DELETE",
             credentials: "include",
         });

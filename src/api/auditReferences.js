@@ -1,7 +1,9 @@
+import {getApiUrl} from "~/api/config.js";
+
 export const getProductTypeForAudit = async (id) => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/ProductType/for-audit/${id}`, {
+        return await $fetch(`${getApiUrl()}/ProductType/for-audit/${id}`, {
             method: 'GET',
             credentials: 'include',
         });
@@ -14,7 +16,7 @@ export const getProductTypeForAudit = async (id) => {
 export const getStorageLocationForAudit = async (id) => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/StorageLocation/for-audit/${id}`, {
+        return await $fetch(`${getApiUrl()}/StorageLocation/for-audit/${id}`, {
             method: 'GET',
             credentials: 'include',
         });

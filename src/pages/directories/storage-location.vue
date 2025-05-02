@@ -45,9 +45,9 @@ import Table from "@/components/common/Table.vue";
 import Modal from "@/components/common/Modal.vue";
 import Notify from "@/components/common/Notify.vue";
 import dayjs from "dayjs";
-import {authMiddleware} from "~/middleware/auth.js";
+import { authMiddleware } from "~/middleware/loginMiddleWare.js";
 
-definePageMeta({ middleware: authMiddleware(true) })
+definePageMeta({ middleware:authMiddleware(true) });
 
 // Уведомления
 const notifyRef = ref(null);

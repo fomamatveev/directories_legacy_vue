@@ -1,7 +1,9 @@
+import {getApiUrl} from "~/api/config.js";
+
 export const getProductTypes = async () => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/ProductType`, {
+        return await $fetch(`${getApiUrl()}/ProductType`, {
             method: 'GET',
             credentials: 'include',
         });
@@ -14,7 +16,7 @@ export const getProductTypes = async () => {
 export const getProductType = async (id) => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/ProductType/${id}`, {
+        return await $fetch(`${getApiUrl()}/ProductType/${id}`, {
             method: 'GET',
             credentials: 'include',
         });
@@ -27,7 +29,7 @@ export const getProductType = async (id) => {
 export const createProductType = async (data) => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/ProductType`, {
+        return await $fetch(`${getApiUrl()}/ProductType`, {
             method: 'POST',
             body: data,
             credentials: 'include',
@@ -41,7 +43,7 @@ export const createProductType = async (data) => {
 export const editProductType = async (id, data) => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/ProductType/${id}`, {
+        return await $fetch(`${getApiUrl()}/ProductType/${id}`, {
             method: 'PUT',
             body: data,
             credentials: 'include',
@@ -55,7 +57,7 @@ export const editProductType = async (id, data) => {
 export const deleteProductType = async (id) => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/ProductType/${id}`, {
+        return await $fetch(`${getApiUrl()}/ProductType/${id}`, {
             method: 'DELETE',
             credentials: 'include',
         });

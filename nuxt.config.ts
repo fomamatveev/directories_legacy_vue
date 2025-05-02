@@ -11,7 +11,8 @@ export default defineNuxtConfig({
     },
     runtimeConfig: {
         public: {
-            apiBase: 'http://localhost:5000'
+            apiBase: 'http://localhost:5000',
+            apiForward: 'http://rgb8x0z7-5000.euw.devtunnels.ms'
         }
     }
 });

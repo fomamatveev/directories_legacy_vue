@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
     <Notify ref="notifyRef" />
 
     <div class="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
@@ -83,10 +83,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { login } from "@/api/auth";
-import Notify from "~/components/common/Notify.vue";
+import {ref} from 'vue';
+import {useRouter} from 'vue-router';
+import {login} from "@/api/auth";
+import Notify from "@/components/common/Notify.vue";
 
 const notifyRef = ref(null);
 const router = useRouter();
@@ -100,8 +100,11 @@ const handleLogin = async () => {
   try {
     await login(username.value, password.value);
 
-    // Перенаправляем пользователя на ту страницу, куда он хотел попасть
-    const redirectPath = route.query.redirect || '/dashboard';
+    // Определяем, является ли устройство мобильным
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const redirectPath = isMobile ? '/mobile/navigation' : '/dashboard';
+
+    // Перенаправляем пользователя на соответствующий маршрут
     router.push(redirectPath);
   } catch (error) {
     console.error('Ошибка входа:', error);

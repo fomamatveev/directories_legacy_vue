@@ -1,7 +1,9 @@
+import {getApiUrl} from "~/api/config.js";
+
 export const login = async (username, password) => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/auth/login`, {
+        return await $fetch(`${getApiUrl()}/auth/login`, {
             method: 'POST',
             body: {username, password},
             credentials: 'include', // Для работы с куки
@@ -15,7 +17,7 @@ export const login = async (username, password) => {
 export const logout = async () => {
     try {
         const config = useRuntimeConfig();
-        return await $fetch(`${config.public.apiBase}/auth/logout`, {
+        return await $fetch(`${getApiUrl()}/auth/logout`, {
             method: 'POST',
             credentials: 'include',
         });
@@ -29,7 +31,7 @@ export const getMe = async () => {
     try {
         const config = useRuntimeConfig();
 
-        await $fetch(`${config.public.apiBase}/auth/getme`, {
+        await $fetch(`${getApiUrl()}/auth/getme`, {
             method: 'GET',
             credentials: 'include',
         });
