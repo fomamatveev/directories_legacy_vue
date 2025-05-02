@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-100 p-4">
-    <Header>Навигация</Header>
+    <Header></Header>
     <div class="container mx-auto p-4">
       <div class="space-y-4">
         <NuxtLink to="/mobile/storage-location" class="block p-4 border border-blue-600 text-black rounded-md shadow-md hover:bg-blue-100">
