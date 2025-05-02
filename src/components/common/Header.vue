@@ -1,8 +1,8 @@
 <template>
-  <nav class="bg-blue-600 text-white p-4">
+  <nav class="bg-blue-600 text-white p-4 rounded-lg">
     <div class="container mx-auto flex items-center justify-between">
       <!-- Левый блок -->
-      <NuxtLink to="/dashboard" class="text-lg font-medium hover:text-gray-200 mr-4 header-link" @click="navigateToMobileNavigation">
+      <NuxtLink to="/dashboard" class="text-lg font-medium hover:text-gray-200 px-4 py-2 rounded header-text header-link" @click="navigateToMobileNavigation">
         Панель управления
       </NuxtLink>
 
@@ -63,7 +63,15 @@ button:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.header-link,
+.header-link {
+  font-size: 1.25rem;
+  transition: background-color 0.3s ease;
+}
+
+.header-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 .header-text {
   font-size: 1.25rem; /* Базовый размер текста */
 }
@@ -76,7 +84,7 @@ button:hover {
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2); /* Внутренняя тень */
   color: oklch(50% 0.243 264.376); /* Цвет текста рамки */
   font-size: 1rem; /* Размер текста */
-  border-radius: 20px; /* Скругленные углы */
+  border-radius: 1rem; /* Скругленные углы */
   font-weight: 500;
 }
 

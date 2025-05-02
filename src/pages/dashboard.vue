@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-screen bg-gray-100 p-4">
     <Header />
     <!-- Основной контент -->
     <div class="container mx-auto p-8">

@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-100 p-4">
     <Notify ref="notifyRef"/>
-    <Header>Добавить товар</Header>
+    <Header>Товар</Header>
 
     <div class="container mx-auto p-4">
       <form @submit.prevent="handleAddItem">

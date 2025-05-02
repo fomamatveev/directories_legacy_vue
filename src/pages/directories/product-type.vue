@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-screen bg-gray-100 p-4">
     <Notify ref="notifyRef" />
 
     <Header>Справочник категорий</Header>

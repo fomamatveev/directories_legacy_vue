@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-100 p-4">
     <Notify ref="notifyRef"/>
-    <Header>Поиск товара</Header>
+    <Header>Поиск</Header>
 
     <div class="container mx-auto p-4">
       <button
