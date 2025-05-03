@@ -76,13 +76,13 @@
 import { ref, onMounted } from 'vue';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { getProductTypes } from "@/api/productType";
-import { getStorageLocations } from "@/api/storageLocation";
+import { getStorageLocations, getStorageLocation } from "@/api/storageLocation";
 import { createProduct } from "@/api/product";
 import Header from "@/components/common/Header.vue";
 import Notify from "@/components/common/Notify.vue";
 import { authMiddleware } from "~/middleware/loginMiddleWare.js";
 
-definePageMeta({ middleware:authMiddleware(true) });
+definePageMeta({ middleware: authMiddleware(true) });
 
 const notifyRef = ref(null);
 
@@ -121,7 +121,7 @@ const handleAddItem = async () => {
   try {
     await createProduct(formData.value);
     notifyRef.value?.showNotify('Товар добавлен', 'success');
-    formData.value = {name: '', quantity: '', productTypeId: '', storageLocationId: ''};
+    formData.value = { name: '', quantity: '', productTypeId: '', storageLocationId: '' };
   } catch (error) {
     console.error('Ошибка добавления товара:', error);
     notifyRef.value?.showNotify('Ошибка добавления товара', 'error');
@@ -130,26 +130,18 @@ const handleAddItem = async () => {
 
 const scanQRCode = () => {
   const scanner = new Html5QrcodeScanner(
-      "reader", {fps: 10});
+      "reader", { fps: 10 });
   scanner.render(async (text) => {
     try {
       const qrData = JSON.parse(text);
-      const {name, quantity, productTypeId, rack, compartment, part} = qrData;
 
-      if (name) {
-        formData.value.name = name;
-      }
-      if (quantity) {
-        formData.value.quantity = quantity;
-      }
-      if (productTypeId && productTypes.value.some(type => type.value === productTypeId)) {
-        formData.value.productTypeId = productTypeId;
-      }
-      if (rack && compartment && part) {
-        const locationLabel = `${rack}/${compartment}/${part}`;
-        const location = storageLocations.value.find(loc => loc.label === locationLabel);
-        if (location) {
-          formData.value.storageLocationId = location.value;
+      if (qrData.Name && qrData.Quantity) {
+        formData.value.name = qrData.Name;
+        formData.value.quantity = qrData.Quantity;
+      } else if (qrData.Id) {
+        const storageLocation = await getStorageLocation(qrData.Id);
+        if (storageLocation) {
+          formData.value.storageLocationId = storageLocation.id;
         }
       }
 
