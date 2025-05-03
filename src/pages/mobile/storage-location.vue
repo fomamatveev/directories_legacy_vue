@@ -81,6 +81,7 @@ import { createProduct } from "~/api/directories/product.js";
 import Header from "@/components/common/Header.vue";
 import Notify from "@/components/common/Notify.vue";
 import { authMiddleware } from "~/middleware/loginMiddleWare.js";
+import { getProductNames } from "~/api/directories/productName.js";
 
 definePageMeta({ middleware: authMiddleware(true) });
 
@@ -93,8 +94,19 @@ const formData = ref({
   storageLocationId: ''
 });
 
+const productNames = ref([]);
 const productTypes = ref([]);
 const storageLocations = ref([]);
+
+const fetchProductNames = async () => {
+  try {
+    productNames.value = (await getProductNames()).map(type => ({ label: type.name, value: type.id }));
+  } catch (error) {
+    console.error("Ошибка при загрузке позиций:", error);
+    notifyRef.value?.showNotify("Ошибка загрузки позиций", "error");
+  }
+};
+
 
 const fetchProductTypes = async () => {
   try {
@@ -135,9 +147,10 @@ const scanQRCode = () => {
     try {
       const qrData = JSON.parse(text);
 
-      if (qrData.Name && qrData.Quantity) {
+      if (qrData.Name && qrData.Quantity && qrData.ProductTypeId) {
         formData.value.name = qrData.Name;
         formData.value.quantity = qrData.Quantity;
+        formData.value.productTypeId = qrData.ProductTypeId;
       } else if (qrData.Id) {
         const storageLocation = await getStorageLocation(qrData.Id);
         if (storageLocation) {
@@ -155,6 +168,7 @@ const scanQRCode = () => {
 };
 
 onMounted(() => {
+  fetchProductNames();
   fetchProductTypes();
   fetchStorageLocations();
 });
