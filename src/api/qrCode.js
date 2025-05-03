@@ -1,10 +1,10 @@
 import {getApiUrl} from "~/api/config.js";
 
-export const generateQRCode = async ({name, quantity}) => {
+export const generateQRCode = async ({ name, quantity, productTypeId }) => {
     try {
         return await $fetch(`${getApiUrl()}/QrCode/generate`, {
             method: 'POST',
-            body: {name, quantity},
+            body: { name, quantity, productTypeId },
             credentials: 'include',
         });
     } catch (error) {
