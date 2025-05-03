@@ -51,6 +51,18 @@
             Перейти к справочнику
           </router-link>
         </div>
+
+        <!-- Карточка 5 - Генерация QR-кодов -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Генерация QR-кодов</h2>
+          <p class="text-gray-600 mb-4">Создавайте QR-коды для товаров</p>
+          <router-link
+              to="/generate-qr"
+              class="text-blue-500 hover:text-blue-700 font-semibold"
+          >
+            Перейти к генерации QR-кодов
+          </router-link>
+        </div>
       </div>
     </div>
   </div>
@@ -61,7 +73,7 @@ import { defineComponent } from 'vue';
 import Header from "@/components/common/Header.vue";
 import { authMiddleware } from "~/middleware/loginMiddleWare.js";
 
-definePageMeta({ middleware:authMiddleware(true) });
+definePageMeta({ middleware: authMiddleware(true) });
 
 export default defineComponent({
   components: {
