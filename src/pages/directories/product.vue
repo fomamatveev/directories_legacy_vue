@@ -44,18 +44,19 @@ import Header from "@/components/common/Header.vue";
 import Table from "@/components/common/Table.vue";
 import Modal from "@/components/common/Modal.vue";
 import Notify from "@/components/common/Notify.vue";
-import { getProducts, createProduct, editProduct, deleteProduct, getProduct } from "@/api/product.js";
-import { getProductTypes } from "@/api/productType.js";
-import { getStorageLocations } from "@/api/storageLocation.js";
+import { getProducts, createProduct, editProduct, deleteProduct, getProduct } from "~/api/directories/product.js";
+import { getProductTypes } from "~/api/directories/productType.js";
+import { getStorageLocations } from "~/api/directories/storageLocation.js";
 import dayjs from "dayjs";
 import { authMiddleware } from "~/middleware/loginMiddleWare.js";
+import {getProductNames} from "~/api/directories/productName.js";
 
 definePageMeta({ middleware:authMiddleware(true) });
 
 const notifyRef = ref(null);
 
 const columns = [
-  { key: "name", label: "Наименование" },
+  { key: "productName", label: "Наименование" },
   { key: "quantity", label: "Кол-во" },
   { key: "productTypeName", label: "Категория" },
   { key: "storageLocationPosition", label: "Место хранения" },
@@ -63,6 +64,7 @@ const columns = [
 ];
 
 const products = ref([]);
+const productNames = ref([]);
 const productTypes = ref([]);
 const storageLocations = ref([]);
 const isModalVisible = ref(false);
@@ -72,7 +74,7 @@ const formData = ref({});
 const itemToDelete = ref(null);
 
 const modalFields = ref([
-  { name: "name", label: "Наименование", placeholder: "Введите значение" },
+  { name: "productNameId", label: "Позиция", placeholder: "Введите позицию", type: "select", options: productNames },
   { name: "quantity", label: "Кол-во", placeholder: "Введите значение", type: "number" },
   { name: "productTypeId", label: "Категория", placeholder: "Выберите категорию", type: "select", options: productTypes },
   { name: "storageLocationId", label: "Место хранения", placeholder: "Выберите место хранения", type: "select", options: storageLocations },
@@ -88,6 +90,15 @@ const fetchProducts = async () => {
   } catch (error) {
     console.error("Ошибка при загрузке товаров:", error);
     notifyRef.value?.showNotify("Ошибка загрузки товаров", "error");
+  }
+};
+
+const fetchProductNames = async () => {
+  try {
+    productNames.value = (await getProductNames()).map(type => ({ label: type.name, value: type.id }));
+  } catch (error) {
+    console.error("Ошибка при загрузке позиций:", error);
+    notifyRef.value?.showNotify("Ошибка загрузки позиций", "error");
   }
 };
 
@@ -115,6 +126,7 @@ const fetchStorageLocations = async () => {
 const openCreateModal = async () => {
   isEditMode.value = false;
   formData.value = {};
+  await fetchProductNames();
   await fetchProductTypes();
   await fetchStorageLocations();
   isModalVisible.value = true;
@@ -124,6 +136,7 @@ const handleEdit = async (row) => {
   isEditMode.value = true;
   try {
     formData.value = await getProduct(row.id);
+    await fetchProductNames();
     await fetchProductTypes();
     await fetchStorageLocations();
     isModalVisible.value = true;

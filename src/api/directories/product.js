@@ -1,8 +1,7 @@
-import {getApiUrl} from "~/api/config.js";
+import {getApiUrl} from "~/api/config.ts";
 
 export const getProducts = async () => {
     try {
-        const config = useRuntimeConfig();
         return await $fetch(`${getApiUrl()}/Product`, {
             method: 'GET',
             credentials: 'include',
@@ -15,7 +14,6 @@ export const getProducts = async () => {
 
 export const getProduct = async (id) => {
     try {
-        const config = useRuntimeConfig();
         return await $fetch(`${getApiUrl()}/Product/${id}`, {
             method: 'GET',
             credentials: 'include',
@@ -28,7 +26,6 @@ export const getProduct = async (id) => {
 
 export const createProduct = async (data) => {
     try {
-        const config = useRuntimeConfig();
         return await $fetch(`${getApiUrl()}/Product`, {
             method: 'POST',
             body: data,
@@ -42,7 +39,6 @@ export const createProduct = async (data) => {
 
 export const editProduct = async (id, data) => {
     try {
-        const config = useRuntimeConfig();
         return await $fetch(`${getApiUrl()}/Product/${id}`, {
             method: 'PUT',
             body: data,
@@ -56,7 +52,6 @@ export const editProduct = async (id, data) => {
 
 export const deleteProduct = async (id) => {
     try {
-        const config = useRuntimeConfig();
         return await $fetch(`${getApiUrl()}/Product/${id}`, {
             method: 'DELETE',
             credentials: 'include',

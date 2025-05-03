@@ -25,7 +25,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { getProduct } from "@/api/product";
+import { getProduct } from "~/api/directories/product.js";
 import Header from "@/components/common/Header.vue";
 import Notify from "@/components/common/Notify.vue";
 import { authMiddleware } from "~/middleware/loginMiddleWare.js";

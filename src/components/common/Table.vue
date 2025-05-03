@@ -17,6 +17,24 @@
       </button>
     </div>
 
+    <div class="filter-container mb-4">
+      <label for="startDate" class="filter-label">От:</label>
+      <input
+          type="date"
+          id="startDate"
+          v-model="startDate"
+          class="filter-input"
+      />
+      <label for="endDate" class="filter-label">До:</label>
+      <input
+          type="date"
+          id="endDate"
+          v-model="endDate"
+          class="filter-input"
+      />
+      <button @click="resetFilter" class="filter-button">Сбросить</button>
+    </div>
+
     <table class="min-w-full border border-gray-300">
       <thead>
       <tr class="bg-gray-200">
@@ -32,7 +50,7 @@
       </thead>
       <tbody>
       <tr
-          v-for="(row, index) in data"
+          v-for="(row, index) in filteredData"
           :key="index"
           class="hover:bg-gray-100"
       >
@@ -69,9 +87,10 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { defineProps, defineEmits, ref, computed } from "vue";
+import dayjs from 'dayjs';
 
-defineProps({
+const props = defineProps({
   columns: Array,
   data: Array,
   isShowCreateButton: { type: Boolean, default: true },
@@ -81,4 +100,60 @@ defineProps({
 });
 
 const emit = defineEmits(["create", "refresh", "edit", "delete"]);
+
+const startDate = ref(null);
+const endDate = ref(null);
+
+const filteredData = computed(() => {
+  return props.data.filter(row => {
+    const rowDate = dayjs(row.updatedAt);
+    const start = startDate.value ? dayjs(startDate.value) : null;
+    const end = endDate.value ? dayjs(endDate.value) : null;
+
+    if (start && end) {
+      return rowDate.isBetween(start, end, null, '[]');
+    } else if (start) {
+      return rowDate.isAfter(start, 'day') || rowDate.isSame(start, 'day');
+    } else if (end) {
+      return rowDate.isBefore(end, 'day') || rowDate.isSame(end, 'day');
+    }
+
+    return true;
+  });
+});
+
+const resetFilter = () => {
+  startDate.value = null;
+  endDate.value = null;
+};
 </script>
+
+<style scoped>
+.filter-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.filter-label {
+  margin-right: 8px;
+}
+
+.filter-input {
+  margin-right: 16px;
+}
+
+.filter-button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.filter-button:hover {
+  background-color: #0056b3;
+}
+</style>

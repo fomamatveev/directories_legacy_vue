@@ -65,16 +65,17 @@ const visibleChanges = computed(() => {
   for (const [field, change] of Object.entries(changesData.value)) {
     if (auditConfig.ignoredFields.includes(field)) continue
 
-    const oldEmpty = isEmptyValue(change.oldValue)
-    const newEmpty = isEmptyValue(change.newValue)
+    const oldValue = change.oldValue
+    const newValue = change.newValue
 
-    if (!oldEmpty || !newEmpty) {
+    // Проверка на изменение значений
+    if (oldValue !== newValue) {
       result[field] = change
       // Предзагрузка reference данных с обработкой ошибок
       if (field.endsWith('Id')) {
-        const id = change.newValue || change.oldValue
+        const id = newValue || oldValue
         if (id) {
-          const entityType = field === 'ProductTypeId' ? 'ProductType' : 'StorageLocation'
+          const entityType = getEntityType(field)
           loadReference(entityType, id).catch(() => {
             // Ошибки уже обрабатываются в referenceService
           })
@@ -101,14 +102,27 @@ const getFieldName = (field) => {
   return fieldNames[field] || field
 }
 
+const getEntityType = (field) => {
+  switch (field) {
+    case 'ProductTypeId':
+      return 'ProductType'
+    case 'StorageLocationId':
+      return 'StorageLocation'
+    case 'ProductNameId':
+      return 'ProductName'
+    default:
+      return null
+  }
+}
+
 const formatValue = (field, value) => {
   if (isEmptyValue(value)) return 'не указано'
 
   // Обработка reference полей
   if (field.endsWith('Id') && typeof value === 'number') {
-    const entityType = field === 'ProductTypeId' ? 'ProductType' : 'StorageLocation'
+    const entityType = getEntityType(field)
     const name = getReferenceName(entityType, value)
-    return `${value} (${name})`
+    return name || value.toString()
   }
 
   if (isDate(value)) {
@@ -119,6 +133,7 @@ const formatValue = (field, value) => {
   return value.toString()
 }
 </script>
+
 <style scoped>
 .diff-container {
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;

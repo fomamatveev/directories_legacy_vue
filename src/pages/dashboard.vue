@@ -16,7 +16,19 @@
           </router-link>
         </div>
 
-        <!-- Карточка 2 - Справочник категорий -->
+        <!-- Карточка 2 - Справочник наименований -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Справочник позиций</h2>
+          <p class="text-gray-600 mb-4">Управляйте позициями на складе</p>
+          <router-link
+              to="/directories/product-name"
+              class="text-blue-500 hover:text-blue-700 font-semibold"
+          >
+            Перейти к справочнику
+          </router-link>
+        </div>
+
+        <!-- Карточка 3 - Справочник категорий -->
         <div class="bg-white shadow-lg rounded-lg p-6">
           <h2 class="text-xl font-semibold text-gray-800 mb-4">Справочник категорий</h2>
           <p class="text-gray-600 mb-4">Управляйте категориями товаров</p>
@@ -28,7 +40,7 @@
           </router-link>
         </div>
 
-        <!-- Карточка 3 - Справочник мест хранения -->
+        <!-- Карточка 4 - Справочник мест хранения -->
         <div class="bg-white shadow-lg rounded-lg p-6">
           <h2 class="text-xl font-semibold text-gray-800 mb-4">Справочник мест хранения</h2>
           <p class="text-gray-600 mb-4">Управляйте местом хранения</p>
@@ -40,7 +52,7 @@
           </router-link>
         </div>
 
-        <!-- Карточка 4 - Движение товаров -->
+        <!-- Карточка 5 - Движение товаров -->
         <div class="bg-white shadow-lg rounded-lg p-6">
           <h2 class="text-xl font-semibold text-gray-800 mb-4">Справочник изменений</h2>
           <p class="text-gray-600 mb-4">Следите за изменениями</p>

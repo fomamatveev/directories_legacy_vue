@@ -1,5 +1,6 @@
 import { ref, onUnmounted } from 'vue'
 import {
+    getProductNameForAudit,
     getProductTypeForAudit,
     getStorageLocationForAudit
 } from '@/api/auditReferences'
@@ -30,6 +31,9 @@ export default function useReferenceService() {
         try {
             let name
             switch (entityType) {
+                case 'ProductName':
+                    name = await getProductNameForAudit(id, { signal: controller.signal })
+                    break
                 case 'ProductType':
                     name = await getProductTypeForAudit(id, { signal: controller.signal })
                     break

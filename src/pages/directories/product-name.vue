@@ -2,19 +2,18 @@
   <div class="min-h-screen bg-gray-100 p-4">
     <Notify ref="notifyRef" />
 
-    <Header>Справочник категорий</Header>
+    <Header>Справочник позиций</Header>
 
     <div class="container mx-auto p-8">
       <Table
           :columns="columns"
-          :data="productTypes"
+          :data="productNames"
           @create="openCreateModal"
           @edit="handleEdit"
           @delete="handleDelete"
           @refresh="handleRefresh"
       />
 
-      <!-- Модальное окно для создания или редактирования -->
       <Modal
           :isVisible="isModalVisible"
           :title="modalTitle"
@@ -25,7 +24,6 @@
           @update:isVisible="isModalVisible = $event"
       />
 
-      <!-- Модальное окно для удаления -->
       <Modal
           :isVisible="isDeleteModalVisible"
           title="Подтвердите действие"
@@ -44,127 +42,115 @@ import Header from "@/components/common/Header.vue";
 import Table from "@/components/common/Table.vue";
 import Modal from "@/components/common/Modal.vue";
 import Notify from "@/components/common/Notify.vue";
-import {
-  getProductTypes,
-  createProductType,
-  deleteProductType,
-  editProductType,
-  getProductType,
-} from "~/api/directories/productType.js";
 import dayjs from "dayjs";
 import { authMiddleware } from "~/middleware/loginMiddleWare.js";
+import {
+  createProductName,
+  deleteProductName,
+  editProductName,
+  getProductName,
+  getProductNames
+} from "~/api/directories/productName.js";
 
 definePageMeta({ middleware:authMiddleware(true) });
 
 const notifyRef = ref(null);
 
-// Колонки таблицы
 const columns = ref([
   { key: "name", label: "Наименование" },
   { key: "shortName", label: "Краткое наименование" },
   { key: "createdAt", label: "Создано в" },
 ]);
 
-// Состояния
-const productTypes = ref([]);
+const productNames = ref([]);
 const isModalVisible = ref(false);
 const isDeleteModalVisible = ref(false);
 const isEditMode = ref(false);
 const formData = ref({});
 const itemToDelete = ref(null);
 
-// Поля модального окна
 const modalFields = ref([
   { name: "name", label: "Наименование", placeholder: "Введите значение" },
   { name: "shortName", label: "Краткое наименование", placeholder: "Введите значение" },
 ]);
 
-// Вычисляемые свойства для заголовка и кнопки модального окна
 const modalTitle = computed(() =>
-    isEditMode.value ? "Редактирование категории товара" : "Создание категории товара"
+    isEditMode.value ? "Редактирование позиции" : "Создание позиции"
 );
 
 const modalActionText = computed(() =>
     isEditMode.value ? "Сохранить" : "Создать"
 );
 
-// Загрузка данных
-const fetchProductTypes = async () => {
+const fetchProductNames = async () => {
   try {
-    const response = await getProductTypes();
+    const response = await getProductNames();
     if (Array.isArray(response)) {
-      productTypes.value = response.map(item => ({
+      productNames.value = response.map(item => ({
         ...item,
         createdAt: dayjs(item.createdAt).format("YYYY.MM.DD HH:mm:ss"),
       }));
     }
   } catch (error) {
     console.error("Ошибка при загрузке данных:", error);
-    notifyRef.value?.showNotify("Ошибка загрузки категорий", "error");
+    notifyRef.value?.showNotify("Ошибка загрузки позиции", "error");
   }
 };
 
-// Открытие модального окна для создания
 const openCreateModal = () => {
   isEditMode.value = false;
   formData.value = {};
   isModalVisible.value = true;
 };
 
-// Открытие модального окна для редактирования
 const handleEdit = async (row) => {
   isEditMode.value = true;
   try {
-    formData.value = await getProductType(row.id);
+    formData.value = await getProductName(row.id);
     isModalVisible.value = true;
   } catch (error) {
     console.error("Ошибка при редактировании:", error);
-    notifyRef.value?.showNotify("Ошибка при редактировании категории", "error");
+    notifyRef.value?.showNotify("Ошибка при редактировании позиции", "error");
   }
 };
 
-// Обработка создания/редактирования
 const handleModalSubmit = async (data) => {
   try {
     if (isEditMode.value) {
-      await editProductType(formData.value.id, data);
-      notifyRef.value?.showNotify("Категория успешно обновлена", "success");
+      await editProductName(formData.value.id, data);
+      notifyRef.value?.showNotify("Позиция успешно обновлена", "success");
     } else {
-      await createProductType(data);
-      notifyRef.value?.showNotify("Категория успешно добавлена", "success");
+      await createProductName(data);
+      notifyRef.value?.showNotify("Позиция успешно добавлена", "success");
     }
-    await fetchProductTypes();
+    await fetchProductNames();
     isModalVisible.value = false;
   } catch (error) {
     console.error("Ошибка при сохранении:", error);
-    notifyRef.value?.showNotify("Ошибка при сохранении категории", "error");
+    notifyRef.value?.showNotify("Ошибка при позиции", "error");
   }
 };
 
-// Обработка удаления
 const handleDelete = (row) => {
   itemToDelete.value = row.id;
   isDeleteModalVisible.value = true;
 };
 
-// Подтверждение удаления
 const handleDeleteConfirm = async () => {
   try {
-    await deleteProductType(itemToDelete.value);
-    notifyRef.value?.showNotify("Категория успешно удалена", "success");
-    await fetchProductTypes();
+    await deleteProductName(itemToDelete.value);
+    notifyRef.value?.showNotify("Позиция успешно удалена", "success");
+    await fetchProductNames();
     isDeleteModalVisible.value = false;
   } catch (error) {
     console.error("Ошибка при удалении:", error);
-    notifyRef.value?.showNotify("Ошибка при удалении категории", "error");
+    notifyRef.value?.showNotify("Ошибка при удалении позиции", "error");
   }
 };
 
-// Обновление данных
 const handleRefresh = async () => {
-  await fetchProductTypes();
+  await fetchProductNames();
 };
 
-// Загрузка данных при монтировании
-onMounted(fetchProductTypes);
+onMounted(fetchProductNames);
 </script>

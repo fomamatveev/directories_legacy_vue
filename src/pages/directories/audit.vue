@@ -8,6 +8,7 @@
           :is-show-create-button="false"
           :is-show-edit-button="false"
           :is-show-delete-button="false"
+          :is-show-date-filter="true"
           :columns="columns"
           :data="processedActions"
           @refresh="handleRefresh"

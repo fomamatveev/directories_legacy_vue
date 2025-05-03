@@ -39,7 +39,7 @@
 
 <script setup>
 import { ref } from "vue";
-import { getStorageLocations, getStorageLocation, createStorageLocation, editStorageLocation, deleteStorageLocation } from "@/api/storageLocation";
+import { getStorageLocations, getStorageLocation, createStorageLocation, editStorageLocation, deleteStorageLocation } from "~/api/directories/storageLocation.js";
 import Header from "@/components/common/Header.vue";
 import Table from "@/components/common/Table.vue";
 import Modal from "@/components/common/Modal.vue";

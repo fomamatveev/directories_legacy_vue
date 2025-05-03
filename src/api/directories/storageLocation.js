@@ -1,4 +1,4 @@
-import {getApiUrl} from "~/api/config.js";
+import {getApiUrl} from "~/api/config.ts";
 
 export const getStorageLocations = async () => {
     try {
@@ -15,7 +15,6 @@ export const getStorageLocations = async () => {
 
 export const getStorageLocation = async (id) => {
     try {
-        const config = useRuntimeConfig();
         return await $fetch(`${getApiUrl()}/StorageLocation/${id}`, {
             method: 'GET',
             credentials: 'include', // Для работы с куки
@@ -28,7 +27,6 @@ export const getStorageLocation = async (id) => {
 
 export const createStorageLocation = async (data) => {
     try {
-        const config = useRuntimeConfig();
         return await $fetch(`${getApiUrl()}/StorageLocation`, {
             method: "POST",
             body: data,
@@ -42,7 +40,6 @@ export const createStorageLocation = async (data) => {
 
 export const editStorageLocation = async (id, data) => {
     try {
-        const config = useRuntimeConfig();
         return await $fetch(`${getApiUrl()}/StorageLocation/${id}`, {
             method: "PUT",
             body: data,
@@ -56,7 +53,6 @@ export const editStorageLocation = async (id, data) => {
 
 export const deleteStorageLocation = async (id) => {
     try {
-        const config = useRuntimeConfig();
         return await $fetch(`${getApiUrl()}/StorageLocation/${id}`, {
             method: "DELETE",
             credentials: "include",

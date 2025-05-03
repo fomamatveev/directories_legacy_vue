@@ -75,9 +75,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { getProductTypes } from "@/api/productType";
-import { getStorageLocations, getStorageLocation } from "@/api/storageLocation";
-import { createProduct } from "@/api/product";
+import { getProductTypes } from "~/api/directories/productType.js";
+import { getStorageLocations, getStorageLocation } from "~/api/directories/storageLocation.js";
+import { createProduct } from "~/api/directories/product.js";
 import Header from "@/components/common/Header.vue";
 import Notify from "@/components/common/Notify.vue";
 import { authMiddleware } from "~/middleware/loginMiddleWare.js";

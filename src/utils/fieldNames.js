@@ -12,6 +12,7 @@ export default {
     // Поля для Товаров
     Description: 'Описание',
     Quantity: 'Кол-во',
+    ProductNameId: 'Позиция',
     ProductTypeId: 'Категория',
     StorageLocationId: 'Место хранения',
 
