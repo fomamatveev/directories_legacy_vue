@@ -2,28 +2,35 @@
   <div class="diff-container">
     <template v-if="!hasVisibleChanges">Нет изменений</template>
     <template v-else>
-      <template v-for="(change, field, index) in visibleChanges" :key="field">
-        <div class="change-row">
-          <div class="field-name">{{ getFieldName(field) }}:</div>
-          <div class="change-values">
-            <div v-if="showOldValue(change)" class="old-value">
-              <span class="diff-sign">-</span>
-              <span class="value-text">{{ formatValue(field, change.oldValue) }}</span>
-            </div>
-            <div v-if="showNewValue(change)" class="new-value">
-              <span class="diff-sign">+</span>
-              <span class="value-text">{{ formatValue(field, change.newValue) }}</span>
+      <div class="summary-row" @click="toggleDiff">
+        <div class="summary-value">
+          <span :class="operationClass">{{ operationLabel }}</span>
+        </div>
+      </div>
+      <div class="diff-content" :class="{ 'expanded': isDiffVisible }">
+        <template v-for="(change, field, index) in visibleChanges" :key="field">
+          <div class="change-row">
+            <div class="field-name">{{ getFieldName(field) }}:</div>
+            <div class="change-values">
+              <div v-if="showOldValue(change)" class="old-value">
+                <span class="diff-sign">-</span>
+                <span class="value-text">{{ formatValue(field, change.oldValue) }}</span>
+              </div>
+              <div v-if="showNewValue(change)" class="new-value">
+                <span class="diff-sign">+</span>
+                <span class="value-text">{{ formatValue(field, change.newValue) }}</span>
+              </div>
             </div>
           </div>
-        </div>
-        <div v-if="index < Object.keys(visibleChanges).length - 1" class="divider"></div>
-      </template>
+          <div v-if="index < Object.keys(visibleChanges).length - 1" class="divider"></div>
+        </template>
+      </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { computed, onUnmounted } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import dayjs from 'dayjs'
 import fieldNames from '@/utils/fieldNames'
 import auditConfig from '@/utils/auditConfig'
@@ -60,7 +67,6 @@ const isDate = (value) => {
 
 const visibleChanges = computed(() => {
   if (!changesData.value) return {}
-
   const result = {}
   for (const [field, change] of Object.entries(changesData.value)) {
     if (auditConfig.ignoredFields.includes(field)) continue
@@ -132,6 +138,42 @@ const formatValue = (field, value) => {
   if (typeof value === 'object') return JSON.stringify(value)
   return value.toString()
 }
+
+const isDiffVisible = ref(false)
+
+const toggleDiff = () => {
+  isDiffVisible.value = !isDiffVisible.value
+}
+
+const getEntityName = computed(() => {
+  return props.entityName || 'Сущность'
+})
+
+const operationLabel = computed(() => {
+  switch (props.operation) {
+    case 'Create':
+      return 'Создание'
+    case 'Update':
+      return 'Изменение'
+    case 'Delete':
+      return 'Удаление'
+    default:
+      return props.operation
+  }
+})
+
+const operationClass = computed(() => {
+  switch (props.operation) {
+    case 'Create':
+      return 'operation-create'
+    case 'Update':
+      return 'operation-update'
+    case 'Delete':
+      return 'operation-delete'
+    default:
+      return ''
+  }
+})
 </script>
 
 <style scoped>
@@ -140,6 +182,29 @@ const formatValue = (field, value) => {
   font-size: 13px;
   line-height: 1.5;
   padding: 8px 0;
+}
+
+.summary-row {
+  display: flex;
+  padding: 8px 16px;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.summary-row:hover {
+  background-color: white;
+  border-radius: 6px;
+}
+
+.diff-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.diff-content.expanded {
+  max-height: 1000px;
 }
 
 .change-row {
@@ -168,12 +233,17 @@ const formatValue = (field, value) => {
   text-align: left;
 }
 
+.summary-value {
+  display: flex;
+  align-items: center;
+}
+
 .change-values {
   flex: 1;
   min-width: 0;
 }
 
-.old-value, .new-value {
+.old-value, .new-value, .operation-create, .operation-update, .operation-delete {
   display: flex;
   align-items: center;
   margin-bottom: 6px;
@@ -206,10 +276,34 @@ const formatValue = (field, value) => {
   word-break: break-word;
 }
 
+.operation-create {
+  background-color: #f0fff0;
+  color: #388e3c;
+  border-left: 3px solid #c8e6c9;
+}
+
+.operation-update {
+  background-color: #fffbdb;
+  color: #ff9800;
+  border-left: 3px solid #ffda9c;
+}
+
+.operation-delete {
+  background-color: #fff0f0;
+  color: #d32f2f;
+  border-left: 3px solid #ffcdd2;
+}
+
 /* Анимация */
 @keyframes fadeIn {
-  from { opacity: 0.5; transform: translateY(2px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0.5;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .old-value, .new-value {
