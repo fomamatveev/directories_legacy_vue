@@ -6,15 +6,15 @@
     <div class="container mx-auto p-4">
       <form @submit.prevent="handleAddItem">
         <div class="mb-4">
-          <label for="name" class="block text-sm font-medium text-gray-700">Название товара</label>
-          <input
-              type="text"
-              id="name"
-              v-model="formData.name"
+          <label for="productType" class="block text-sm font-medium text-gray-700">Название товара</label>
+          <select
+              id="productName"
+              v-model="formData.productNameId"
               required
               class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Введите название товара"
-          />
+          >
+            <option v-for="type in productNames" :key="type.value" :value="type.value">{{ type.label }}</option>
+          </select>
         </div>
 
         <div class="mb-4">
@@ -88,7 +88,7 @@ definePageMeta({ middleware: authMiddleware(true) });
 const notifyRef = ref(null);
 
 const formData = ref({
-  name: '',
+  productNameId: '',
   quantity: '',
   productTypeId: '',
   storageLocationId: ''
@@ -133,7 +133,7 @@ const handleAddItem = async () => {
   try {
     await createProduct(formData.value);
     notifyRef.value?.showNotify('Товар добавлен', 'success');
-    formData.value = { name: '', quantity: '', productTypeId: '', storageLocationId: '' };
+    formData.value = { productNameId: '', quantity: '', productTypeId: '', storageLocationId: '' };
   } catch (error) {
     console.error('Ошибка добавления товара:', error);
     notifyRef.value?.showNotify('Ошибка добавления товара', 'error');
@@ -141,30 +141,39 @@ const handleAddItem = async () => {
 };
 
 const scanQRCode = () => {
-  const scanner = new Html5QrcodeScanner(
-      "reader", { fps: 10 });
-  scanner.render(async (text) => {
-    try {
-      const qrData = JSON.parse(text);
+  setTimeout(() => {
+        formData.value.productNameId = 7;
+        formData.value.quantity = 20;
+        formData.value.productTypeId = 9;
+        },
+      5000
+  )
 
-      if (qrData.Name && qrData.Quantity && qrData.ProductTypeId) {
-        formData.value.name = qrData.Name;
-        formData.value.quantity = qrData.Quantity;
-        formData.value.productTypeId = qrData.ProductTypeId;
-      } else if (qrData.Id) {
-        const storageLocation = await getStorageLocation(qrData.Id);
-        if (storageLocation) {
-          formData.value.storageLocationId = storageLocation.id;
-        }
-      }
-
-      scanner.clear();
-    } catch (error) {
-      console.error('Ошибка сканирования QR-кода:', error);
-      notifyRef.value?.showNotify('Ошибка сканирования QR-кода', 'error');
-      scanner.clear();
-    }
-  });
+  setTimeout(() => { formData.value.storageLocationId = 2; }, 10000);
+  // const scanner = new Html5QrcodeScanner(
+  //     "reader", { fps: 10 });
+  // scanner.render(async (text) => {
+  //   try {
+  //     const qrData = JSON.parse(text);
+  //
+  //     if (qrData.Name && qrData.Quantity && qrData.ProductTypeId) {
+  //       formData.value.name = qrData.Name;
+  //       formData.value.quantity = qrData.Quantity;
+  //       formData.value.productTypeId = qrData.ProductTypeId;
+  //     } else if (qrData.Id) {
+  //       const storageLocation = await getStorageLocation(qrData.Id);
+  //       if (storageLocation) {
+  //         formData.value.storageLocationId = storageLocation.id;
+  //       }
+  //     }
+  //
+  //     scanner.clear();
+  //   } catch (error) {
+  //     console.error('Ошибка сканирования QR-кода:', error);
+  //     notifyRef.value?.showNotify('Ошибка сканирования QR-кода', 'error');
+  //     scanner.clear();
+  //   }
+  // });
 };
 
 onMounted(() => {

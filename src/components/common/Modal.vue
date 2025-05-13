@@ -50,7 +50,7 @@
           >
             Отмена
           </button>
-          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
+          <button v-if="showActionButton" type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
             {{ actionButtonText }}
           </button>
         </div>
@@ -70,6 +70,7 @@ const props = defineProps({
   formData: Object,
   actionButtonText: String,
   customActionText: { type: String, default: "" },
+  showActionButton: { type: Boolean, default: true }
 });
 
 // Определение событий

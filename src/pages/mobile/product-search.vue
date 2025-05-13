@@ -7,17 +7,22 @@
       <button
           type="button"
           class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4"
-          @click="scanQRCode"
+          @click="showDemoData"
       >
         Отсканировать QR-код
       </button>
 
-      <div v-if="product" class="bg-white p-4 rounded-md shadow-md">
-        <h2 class="text-xl font-bold mb-2">{{ product.name }}</h2>
-        <p><strong>Категория:</strong> {{ product.productTypeName }}</p>
-        <p><strong>Количество:</strong> {{ product.quantity }}</p>
-        <p><strong>Место хранения:</strong> {{ product.storageLocationPosition }}</p>
-      </div>
+
+      <Modal
+          :isVisible="showDemo"
+          title="Информация о товаре"
+          :fields="modalFields"
+          :action-button-text="isEditMode ? 'Сохранить' : 'Создать'"
+          :show-action-button="false"
+          :formData="formData"
+          @submit="handleModal"
+          @update:isVisible="isModalVisible = $event"
+      />
     </div>
   </div>
 </template>
@@ -29,11 +34,70 @@ import { getProduct } from "~/api/directories/product.js";
 import Header from "@/components/common/Header.vue";
 import Notify from "@/components/common/Notify.vue";
 import { authMiddleware } from "~/middleware/loginMiddleWare.js";
+import Modal from "~/components/common/Modal.vue";
+import {getProductNames} from "~/api/directories/productName.js";
+import {getProductTypes} from "~/api/directories/productType.js";
+import {getStorageLocations} from "~/api/directories/storageLocation.js";
 
 definePageMeta({ middleware:authMiddleware(true) });
 
 const notifyRef = ref(null);
 const product = ref(null);
+const showDemo = ref(false);
+
+const productNames = ref([]);
+const productTypes = ref([]);
+const storageLocations = ref([]);
+const isModalVisible = ref(false);
+const isEditMode = ref(false);
+const formData = ref({});
+
+const fetchProductNames = async () => {
+  try {
+    productNames.value = (await getProductNames()).map(type => ({ label: type.name, value: type.id }));
+  } catch (error) {
+    console.error("Ошибка при загрузке позиций:", error);
+    notifyRef.value?.showNotify("Ошибка загрузки позиций", "error");
+  }
+};
+
+const fetchProductTypes = async () => {
+  try {
+    productTypes.value = (await getProductTypes()).map(type => ({ label: type.name, value: type.id }));
+  } catch (error) {
+    console.error("Ошибка при загрузке категорий:", error);
+    notifyRef.value?.showNotify("Ошибка загрузки категорий", "error");
+  }
+};
+
+const fetchStorageLocations = async () => {
+  try {
+    storageLocations.value = (await getStorageLocations()).map(location => ({
+      label: `${location.rack}/${location.compartment}/${location.part}`,
+      value: location.id,
+    }));
+  } catch (error) {
+    console.error("Ошибка при загрузке мест хранения:", error);
+    notifyRef.value?.showNotify("Ошибка загрузки мест хранения", "error");
+  }
+};
+
+const showDemoData = async () => {
+  showDemo.value = true;
+  setTimeout(async () => {
+    formData.value = await getProduct(9);
+    await fetchProductNames();
+    await fetchProductTypes();
+    await fetchStorageLocations();
+  }, 3000)
+};
+
+const modalFields = ref([
+  { name: "productNameId", label: "Позиция", placeholder: "Введите позицию", type: "select", options: productNames },
+  { name: "quantity", label: "Кол-во", placeholder: "Введите значение", type: "number" },
+  { name: "productTypeId", label: "Категория", placeholder: "Выберите категорию", type: "select", options: productTypes },
+  { name: "storageLocationId", label: "Место хранения", placeholder: "Выберите место хранения", type: "select", options: storageLocations },
+]);
 
 const scanQRCode = () => {
   const scanner = new Html5QrcodeScanner(
