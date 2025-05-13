@@ -1,4 +1,4 @@
-const useForward = false;
+const useForward = true;
 
 export const getApiUrl = () => {
     const cfg = useRuntimeConfig();
