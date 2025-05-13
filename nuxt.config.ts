@@ -12,7 +12,6 @@ export default defineNuxtConfig({
     runtimeConfig: {
         public: {
             apiBase: 'http://localhost:5000',
-            apiForward: 'http://193.124.118.54:5000'
         }
     }
 });
